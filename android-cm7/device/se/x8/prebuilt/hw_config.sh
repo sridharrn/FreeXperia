@@ -8,7 +8,7 @@ echo linear > /sys/devices/platform/i2c-adapter/i2c-0/0-0036/br::mapping  # line
 echo 32768 > /sys/devices/platform/i2c-adapter/i2c-0/0-0036/br::rate::up   # 8, 1024, 2048, 4096, 8192, 16384, 32768, 65538
 echo 32768 > /sys/devices/platform/i2c-adapter/i2c-0/0-0036/br::rate::down # 8, 1024, 2048, 4096, 8192, 16384, 32768, 65538
 echo 254 > /sys/devices/platform/i2c-adapter/i2c-0/0-0036/br::limit       # 0 - 255
-echo 22.5 > /sys/devices/platform/i2c-adapter/i2c-0/0-0036/br::fsc        # 5.0, 8.5, 12.0, 15.5, 19.0, 22.5, 26.0, 29.5
+echo 26.0 > /sys/devices/platform/i2c-adapter/i2c-0/0-0036/br::fsc        # 5.0, 8.5, 12.0, 15.5, 19.0, 22.5, 26.0, 29.5
 echo 4,16,64,250 > /sys/devices/platform/i2c-adapter/i2c-0/0-0036/curve::borders
 echo 47,75,114,164,226 > /sys/devices/platform/i2c-adapter/i2c-0/0-0036/curve::targets
 echo high-z > /sys/devices/platform/i2c-adapter/i2c-0/0-0036/als::r1      # high-z, 9360, 5560 .. 677.6 (see chip mnual)

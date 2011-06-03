@@ -1,1 +1,1 @@
-#define UTS_RELEASE "2.6.29.6-b10"
+#define UTS_RELEASE "2.6.29.6-b12"

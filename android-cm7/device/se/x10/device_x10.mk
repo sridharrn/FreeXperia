@@ -10,15 +10,18 @@ PRODUCT_MODEL := X10
 PRODUCT_PACKAGES += \
     gps.qsd8k \
     lights.es209ra \
-    sensors.es209ra \
     gralloc.es209ra \
     copybit.es209ra \
     libOmxCore \
     libOmxVdec \
     libOmxVidEnc \
     libmm-omxcore \
-    SETorch
+    SETorch \
+    LiveWallpapersPicker
 
+
+#    sensors.es209ra \
+    
 # proprietary side of the device
 $(call inherit-product-if-exists, vendor/se/x10/x10-vendor.mk)
 
@@ -175,7 +178,8 @@ PRODUCT_COPY_FILES += \
     device/se/x10/prebuilt/wpa_supplicant.conf:system/etc/wifi/wpa_supplicant.conf \
     vendor/se/x10/proprietary/etc/dhcpcd/dhcpcd-hooks/01-test:system/etc/dhcpcd/dhcpcd-hooks/01-test \
     vendor/se/x10/proprietary/etc/dhcpcd/dhcpcd-run-hooks:system/etc/dhcpcd/dhcpcd-run-hooks \
-    vendor/se/x10/proprietary/etc/dhcpcd/dhcpcd.conf:system/etc/dhcpcd/dhcpcd.conf 
+    vendor/se/x10/proprietary/etc/dhcpcd/dhcpcd.conf:system/etc/dhcpcd/dhcpcd.conf \
+    vendor/se/x10/proprietary/lib/hw/sensors.default.so:system/lib/hw/sensors.es209ra.so
 
 
 #testing kernel

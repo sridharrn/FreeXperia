@@ -327,9 +327,9 @@ struct usb_composite_dev {
 	/* protects at least deactivation count */
 	spinlock_t			lock;
 
-	struct usb_mass_storage_lun_config *cdrom_lun_conf;
+//	struct usb_mass_storage_lun_config *cdrom_lun_conf;
 	struct usb_mass_storage_lun_config *msc_lun_conf;
-	struct usb_mass_storage_lun_config *msc_cdrom_lun_conf;
+//	struct usb_mass_storage_lun_config *msc_cdrom_lun_conf;
 };
 
 extern int usb_string_id(struct usb_composite_dev *c);

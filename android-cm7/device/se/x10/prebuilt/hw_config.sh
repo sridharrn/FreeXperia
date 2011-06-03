@@ -37,3 +37,6 @@ chmod 777 /dev/graphics/fb0
 #J WIFI FIX
 mkdir /data/system/wpa_supplicant
 chown wifi.wifi /data/system/wpa_supplicant
+
+#J Cpu Speed Setup
+echo 998400 >/sys/devices/system/cpu/cpu0/scaling_max_freq

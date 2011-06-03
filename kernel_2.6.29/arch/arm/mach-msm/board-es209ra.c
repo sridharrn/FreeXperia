@@ -118,7 +118,7 @@
 #endif
 #include <linux/spi/es209ra_touch_mt.h>
 #include <asm/setup.h>
-#include "q6audio.h"
+#include "qdsp6/q6audio.h"
 #include <../../../drivers/video/msm/mddi_tmd_nt35580.h>
 #ifdef CONFIG_SEMC_LOW_BATT_SHUTDOWN
 #include <mach/semc_low_batt_shutdown.h>
@@ -292,32 +292,35 @@ static struct usb_composition usb_func_composition[] = {
 	{
 		/* MSC( + CDROM) */
 		.product_id	= 0x312E,
-		.functions	= 0xD,
+		.functions	= 0x02,
+		//0xD,
 		/* MSC( + CDROM) + ADB */
 		.adb_product_id	= 0x212E,
-		.adb_functions	= 0x1D,
+		.adb_functions	= 0x12,
+		//0x1D,
 		/* DIAG + ADB + MODEM + NMEA + MSC( + CDROM) */
 		.eng_product_id	= 0x2146,
-		.eng_functions	= 0xD7614,
+		.eng_functions	= 0x27614,
+		//0xD7614,
 	},
-	{
-		/* MSC */
-		.product_id	= 0xE12E,
-		.functions	= 0x02,
-		/* MSC + ADB */
-		.adb_product_id	= 0x612E,
-		.adb_functions	= 0x12,
-		/* MSC + ADB + MODEM + NMEA + DIAG */
-		.eng_product_id	= 0x6146,
-		.eng_functions	= 0x47612,
-	},
-	{
-		/* ADB+MSC+ECM */
-		.product_id	= 0x3146,
-		.functions	= 0x821,
-		.adb_product_id	= 0x3146,
-		.adb_functions	= 0x821,
-	},
+//	{
+//		/* MSC */
+//		.product_id	= 0xE12E,
+//		.functions	= 0x02,
+//		/* MSC + ADB */
+//		.adb_product_id	= 0x612E,
+//		.adb_functions	= 0x12,
+//		/* MSC + ADB + MODEM + NMEA + DIAG */
+//		.eng_product_id	= 0x6146,
+//		.eng_functions	= 0x47612,
+//	},
+//	{
+//		/* ADB+MSC+ECM */
+//		.product_id	= 0x3146,
+//		.functions	= 0x821,
+//		.adb_product_id	= 0x3146,
+//		.adb_functions	= 0x821,
+//	},
 };
 static struct usb_mass_storage_lun_config msc_lun_config = {
 	.is_cdrom	= false,
@@ -327,32 +330,32 @@ static struct usb_mass_storage_lun_config msc_lun_config = {
 	.product	= "Mass Storage",
 	.release	= 0x0001,
 };
-static struct usb_mass_storage_lun_config cdrom_lun_config = {
-	.is_cdrom	= true,
-	.shift_size	= 11,
-	.can_stall	= false,
-	.vendor		= "SEMC",
-	.product	= "CD-ROM",
-	.release	= 0x0001,
-};
-static struct usb_mass_storage_lun_config msc_cdrom_lun_config[] = {
-	{
-		.is_cdrom	= false,
-		.shift_size	= 9,
-		.can_stall	= true,
-		.vendor		= "SEMC",
-		.product	= "Mass Storage",
-		.release	= 0x0001,
-	},
-	{
-		.is_cdrom	= true,
-		.shift_size	= 11,
-		.can_stall	= false,
-		.vendor		= "SEMC",
-		.product	= "CD-ROM",
-		.release	= 0x0001,
-	},
-};
+//static struct usb_mass_storage_lun_config cdrom_lun_config = {
+//	.is_cdrom	= true,
+//	.shift_size	= 11,
+//	.can_stall	= false,
+//	.vendor		= "SEMC",
+//	.product	= "CD-ROM",
+//	.release	= 0x0001,
+//};
+//static struct usb_mass_storage_lun_config msc_cdrom_lun_config[] = {
+//	{
+//		.is_cdrom	= false,
+//		.shift_size	= 9,
+//		.can_stall	= true,
+//		.vendor		= "SEMC",
+//		.product	= "Mass Storage",
+//		.release	= 0x0001,
+//	},
+//	{
+//		.is_cdrom	= true,
+//		.shift_size	= 11,
+//		.can_stall	= false,
+//		.vendor		= "SEMC",
+//		.product	= "CD-ROM",
+//		.release	= 0x0001,
+//	},
+//};
 static struct android_usb_platform_data android_usb_pdata = {
 	.vendor_id		= 0x0FCE,
 	.version		= 0x0100,
@@ -362,9 +365,9 @@ static struct android_usb_platform_data android_usb_pdata = {
 	.product_name		= "SEMC HSUSB Device",
 	.manufacturer_name	= "SEMC",
 	.nluns			= 1,
-	.cdrom_lun_conf		= &cdrom_lun_config,
+//	.cdrom_lun_conf		= &cdrom_lun_config,
 	.msc_lun_conf		= &msc_lun_config,
-	.msc_cdrom_lun_conf	= msc_cdrom_lun_config,
+//	.msc_cdrom_lun_conf	= msc_cdrom_lun_config,
 };
 static struct platform_device android_usb_device = {
 	.name	= "android_usb",
@@ -1083,12 +1086,11 @@ static void __init msm_mddi_tmd_fwvga_display_device_init(void)
 	panel_data->panel_info.lcd.hw_vsync_mode = FALSE;
 	panel_data->panel_info.lcd.vsync_notifier_period = 0;
 
-	panel_data->panel_info.lcd.refx100 = 200000000 / 13389;
+	panel_data->panel_info.lcd.refx100 = 200000000 / 16766;
 
 	panel_data->panel_ext = &tmd_wvga_panel_ext;
 
-	mddi_tmd_wvga_display_device.dev.platform_data =
-						&tmd_wvga_panel_data;
+	mddi_tmd_wvga_display_device.dev.platform_data =&tmd_wvga_panel_data;
 
 	vreg_gp2 = vreg_get(NULL, "gp2");
 	if (IS_ERR(vreg_gp2)) {
@@ -2571,20 +2573,20 @@ static void __init es209ra_map_io(void)
 	msm_clock_init(msm_clocks_8x50, msm_num_clocks_8x50);
 }
 
-static int __init board_serialno_setup(char *serialno)
-{
-#ifdef CONFIG_USB_ANDROID
-	android_usb_pdata.serial_number = serialno;
-	printk(KERN_INFO "USB serial number: %s\n", android_usb_pdata.serial_number);
-#endif
-#ifdef CONFIG_USB_FUNCTION
-	msm_hsusb_pdata.serial_number = serialno;
-	printk(KERN_INFO "USB serial number: %s\n", msm_hsusb_pdata.serial_number);
-#endif
-	return 1;
-}
-__setup_param("serialno=", board_serialno_setup_1, board_serialno_setup, 0);
-__setup_param("semcandroidboot.serialno=", board_serialno_setup_2, board_serialno_setup, 0);
+//static int __init board_serialno_setup(char *serialno)
+//{
+//#ifdef CONFIG_USB_ANDROID
+//	android_usb_pdata.serial_number = serialno;
+//	printk(KERN_INFO "USB serial number: %s\n", android_usb_pdata.serial_number);
+//#endif
+//#ifdef CONFIG_USB_FUNCTION
+//	msm_hsusb_pdata.serial_number = serialno;
+//	printk(KERN_INFO "USB serial number: %s\n", msm_hsusb_pdata.serial_number);
+//#endif
+//	return 1;
+//}
+//__setup_param("serialno=", board_serialno_setup_1, board_serialno_setup, 0);
+//__setup_param("semcandroidboot.serialno=", board_serialno_setup_2, board_serialno_setup, 0);
 
 MACHINE_START(ES209RA, "ES209RA")
 #ifdef CONFIG_MSM_DEBUG_UART

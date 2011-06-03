@@ -1,15 +1,12 @@
-# The gps config appropriate for this device
-$(call inherit-product, device/common/gps/gps_us_supl.mk)
+$(call inherit-product, $(SRC_TARGET_DIR)/product/languages_full.mk)
+$(call inherit-product, $(SRC_TARGET_DIR)/product/full_base.mk)
+$(call inherit-product, device/common/gps/gps_eu_supl.mk)
 
-$(call inherit-product-if-exists, vendor/se/x8/x8-vendor.mk)
+# Discard inherited values and use our own instead.
+PRODUCT_NAME := X8
+PRODUCT_DEVICE := X8
+PRODUCT_MODEL := X8
 
-DEVICE_PACKAGE_OVERLAYS += device/se/x8/overlay
-
-PRODUCT_PROPERTY_OVERRIDES += \
-    dalvik.vm.heapsize=32m \
-    persistent.sys.vm.heapsize=32m 
-    
-# HAL libs and other system binaries
 PRODUCT_PACKAGES += \
     gps.shakira \
     gralloc.shakira \
@@ -17,48 +14,67 @@ PRODUCT_PACKAGES += \
     lights.shakira \
     libOmxCore \
     libmm-omxcore\
-    libaudio
+    LiveWallpapersPicker
 
-# Live wallpaper packages
-PRODUCT_PACKAGES += \
-    LiveWallpapersPicker \
-    librs_jni
-#    sensors.shakira \
-#    LiveWallpapers \
-#    MagicSmokeWallpapers \
-#    VisualizationWallpapers 
-        
-# Publish that we support the live wallpaper feature.
-PRODUCT_COPY_FILES += \
-    packages/wallpapers/LivePicker/android.software.live_wallpaper.xml:/system/etc/permissions/android.software.live_wallpaper.xml
+#    libaudio
+#    sensors.shakira
 
-## RIL related stuff
-PRODUCT_COPY_FILES += \
-    vendor/se/x8/proprietary/bin/port-bridge:system/bin/port-bridge \
-    vendor/se/x8/proprietary/bin/qmuxd:system/bin/qmuxd \
-    vendor/se/x8/proprietary/lib/libauth.so:system/lib/libauth.so \
-    vendor/se/x8/proprietary/lib/libcm.so:system/lib/libcm.so \
-    vendor/se/x8/proprietary/lib/libdiag.so:system/lib/libdiag.so \
-    vendor/se/x8/proprietary/lib/libdll.so:system/lib/libdll.so \
-    vendor/se/x8/proprietary/lib/libdss.so:system/lib/libdss.so \
-    vendor/se/x8/proprietary/lib/libdsm.so:system/lib/libdsm.so \
-    vendor/se/x8/proprietary/lib/libgsdi_exp.so:system/lib/libgsdi_exp.so \
-    vendor/se/x8/proprietary/lib/libgstk_exp.so:system/lib/libgstk_exp.so \
-    vendor/se/x8/proprietary/lib/libmmgsdilib.so:system/lib/libmmgsdilib.so \
-    vendor/se/x8/proprietary/lib/libnv.so:system/lib/libnv.so \
-    vendor/se/x8/proprietary/lib/liboem_rapi.so:system/lib/liboem_rapi.so \
-    vendor/se/x8/proprietary/lib/liboncrpc.so:system/lib/liboncrpc.so \
-    vendor/se/x8/proprietary/lib/libpbmlib.so:system/lib/libpbmlib.so \
-    vendor/se/x8/proprietary/lib/libqmi.so:system/lib/libqmi.so \
-    vendor/se/x8/proprietary/lib/libqueue.so:system/lib/libqueue.so \
-    vendor/se/x8/proprietary/lib/libril-qc-1.so:system/lib/libril-qc-1.so \
-    vendor/se/x8/proprietary/lib/libwms.so:system/lib/libwms.so \
-    vendor/se/x8/proprietary/lib/libwmsts.so:system/lib/libwmsts.so 
-#    vendor/se/x8/proprietary/lib/libril.so:system/lib/libril.so \
+# proprietary side of the device
+$(call inherit-product-if-exists, vendor/se/x8/x8-vendor.mk)
 
-## SE Sensors
+DISABLE_DEXPREOPT := false
+
+PRODUCT_SPECIFIC_DEFINES += TARGET_PRELINKER_MAP=$(TOP)/device/se/x8/prelink-linux-arm-x8.map
+
+# These is the hardware-specific overlay, which points to the location
+# of hardware-specific resource overrides, typically the frameworks and
+# application settings that are stored in resourced.
+DEVICE_PACKAGE_OVERLAYS := device/se/x8/overlay
+
+# These are the hardware-specific configuration files
+PRODUCT_COPY_FILES := \
+	device/se/x8/prebuilt/vold.fstab:system/etc/vold.fstab \
+	vendor/se/x8/proprietary/lib/egl/egl.cfg:system/lib/egl/egl.cfg 
+
+
+# Init files
 PRODUCT_COPY_FILES += \
-    vendor/se/x8/proprietary/lib/hw/sensors.default.so:system/lib/hw/sensors.shakira.so
+	device/se/x8/ramdisk/init.delta.rc:root/init.delta.rc 
+
+# Prebuilt kl keymaps
+PRODUCT_COPY_FILES += \
+    vendor/se/x8/proprietary/usr/keylayout/shakira_keypad.kl:system/usr/keylayout/shakira_keypad.kl \
+    vendor/se/x8/proprietary/usr/keylayout/systemconnector.kl:system/usr/keylayout/systemconnector.kl \
+    vendor/se/x8/proprietary/usr/keychars/shakira_keypad.kcm.bin:system/usr/keychars/shakira_keypad.kcm.bin \
+    vendor/se/x8/proprietary/usr/keychars/systemconnector.kcm.bin:system/usr/keychars/systemconnector.kcm.bin 
+
+# These are the hardware-specific features
+PRODUCT_COPY_FILES += \
+	frameworks/base/data/etc/handheld_core_hardware.xml:system/etc/permissions/handheld_core_hardware.xml \
+	frameworks/base/data/etc/android.hardware.camera.flash-autofocus.xml:system/etc/permissions/android.hardware.camera.flash-autofocus.xml \
+	frameworks/base/data/etc/android.hardware.camera.front.xml:system/etc/permissions/android.hardware.camera.front.xml \
+	frameworks/base/data/etc/android.hardware.telephony.gsm.xml:system/etc/permissions/android.hardware.telephony.gsm.xml \
+	frameworks/base/data/etc/android.hardware.location.gps.xml:system/etc/permissions/android.hardware.location.gps.xml \
+	frameworks/base/data/etc/android.hardware.wifi.xml:system/etc/permissions/android.hardware.wifi.xml \
+	frameworks/base/data/etc/android.hardware.sensor.proximity.xml:system/etc/permissions/android.hardware.sensor.proximity.xml \
+	frameworks/base/data/etc/android.hardware.sensor.light.xml:system/etc/permissions/android.hardware.sensor.light.xml \
+	frameworks/base/data/etc/android.hardware.sensor.gyroscope.xml:system/etc/permissions/android.hardware.sensor.gyroscope.xml \
+	frameworks/base/data/etc/android.hardware.touchscreen.multitouch.jazzhand.xml:system/etc/permissions/android.hardware.touchscreen.multitouch.jazzhand.xml \
+	frameworks/base/data/etc/android.hardware.nfc.xml:system/etc/permissions/android.hardware.nfc.xml \
+	frameworks/base/data/etc/android.software.sip.voip.xml:system/etc/permissions/android.software.sip.voip.xml \
+	packages/wallpapers/LivePicker/android.software.live_wallpaper.xml:system/etc/permissions/android.software.live_wallpaper.xml
+
+
+ifeq ($(TARGET_PREBUILT_KERNEL),)
+LOCAL_KERNEL := device/se/x8/kernel
+else
+LOCAL_KERNEL := $(TARGET_PREBUILT_KERNEL)
+endif
+
+PRODUCT_COPY_FILES += \
+    $(LOCAL_KERNEL):kernel
+
+
 
 
 ## OMX proprietaries
@@ -81,15 +97,31 @@ PRODUCT_COPY_FILES += \
     vendor/se/x8/proprietary/lib/libOmxQcelp13Enc.so:system/lib/libOmxQcelp13Enc.so \
     vendor/se/x8/proprietary/lib/libOmxWmvDec.so:system/lib/libOmxWmvDec.so
 
-## Hardware properties 
+
+## RIL related stuff
 PRODUCT_COPY_FILES += \
-    frameworks/base/data/etc/handheld_core_hardware.xml:system/etc/permissions/handheld_core_hardware.xml \
-    frameworks/base/data/etc/android.hardware.telephony.gsm.xml:system/etc/permissions/android.hardware.telephony.gsm.xml \
-    frameworks/base/data/etc/android.hardware.location.gps.xml:system/etc/permissions/android.hardware.location.gps.xml \
-    frameworks/base/data/etc/android.hardware.wifi.xml:system/etc/permissions/android.hardware.wifi.xml \
-    frameworks/base/data/etc/android.hardware.sensor.proximity.xml:system/etc/permissions/android.hardware.sensor.proximity.xml \
-    frameworks/base/data/etc/android.hardware.sensor.light.xml:system/etc/permissions/android.hardware.sensor.light.xml \
-    frameworks/base/data/etc/android.hardware.touchscreen.multitouch.distinct.xml:system/etc/permissions/android.hardware.touchscreen.multitouch.distinct.xml
+    vendor/se/x8/proprietary/bin/port-bridge:system/bin/port-bridge \
+    vendor/se/x8/proprietary/bin/qmuxd:system/bin/qmuxd \
+    vendor/se/x8/proprietary/lib/libauth.so:system/lib/libauth.so \
+    vendor/se/x8/proprietary/lib/libcm.so:system/lib/libcm.so \
+    vendor/se/x8/proprietary/lib/libdiag.so:system/lib/libdiag.so \
+    vendor/se/x8/proprietary/lib/libdll.so:system/lib/libdll.so \
+    vendor/se/x8/proprietary/lib/libdss.so:system/lib/libdss.so \
+    vendor/se/x8/proprietary/lib/libdsm.so:system/lib/libdsm.so \
+    vendor/se/x8/proprietary/lib/libgsdi_exp.so:system/lib/libgsdi_exp.so \
+    vendor/se/x8/proprietary/lib/libgstk_exp.so:system/lib/libgstk_exp.so \
+    vendor/se/x8/proprietary/lib/libmmgsdilib.so:system/lib/libmmgsdilib.so \
+    vendor/se/x8/proprietary/lib/libnv.so:system/lib/libnv.so \
+    vendor/se/x8/proprietary/lib/liboem_rapi.so:system/lib/liboem_rapi.so \
+    vendor/se/x8/proprietary/lib/liboncrpc.so:system/lib/liboncrpc.so \
+    vendor/se/x8/proprietary/lib/libpbmlib.so:system/lib/libpbmlib.so \
+    vendor/se/x8/proprietary/lib/libqmi.so:system/lib/libqmi.so \
+    vendor/se/x8/proprietary/lib/libqueue.so:system/lib/libqueue.so \
+    vendor/se/x8/proprietary/lib/libril-qc-1.so:system/lib/libril-qc-1.so \
+    vendor/se/x8/proprietary/lib/libwms.so:system/lib/libwms.so \
+    vendor/se/x8/proprietary/lib/libwmsts.so:system/lib/libwmsts.so \
+    vendor/se/x8/proprietary/lib/libril.so:system/lib/libril.so
+
 
 ## Camera proprietaries
 PRODUCT_COPY_FILES += \
@@ -103,6 +135,7 @@ PRODUCT_COPY_FILES += \
 PRODUCT_COPY_FILES += \
     device/se/x8/modules/sdio.ko:system/lib/modules/sdio.ko \
     device/se/x8/modules/tiwlan_drv.ko:system/lib/modules/tiwlan_drv.ko \
+    vendor/se/x8/proprietary/bin/hciattach:system/bin/hciattach \
     vendor/se/x8/proprietary/etc/firmware/fm_rx_init_1273.1.bts:system/etc/firmware/fm_rx_init_1273.1.bts \
     vendor/se/x8/proprietary/etc/firmware/fm_rx_init_1273.2.bts:system/etc/firmware/fm_rx_init_1273.2.bts \
     vendor/se/x8/proprietary/etc/firmware/fm_tx_init_1273.1.bts:system/etc/firmware/fm_tx_init_1273.1.bts \
@@ -115,6 +148,10 @@ PRODUCT_COPY_FILES += \
 #    vendor/se/x8/proprietary/etc/tiwlan.ini:system/etc/wifi/tiwlan.ini \
 #    vendor/se/x8/proprietary/bin/tiwlan_loader:system/bin/tiwlan_loader \
 
+
+## SE Sensors
+PRODUCT_COPY_FILES += \
+    vendor/se/x8/proprietary/lib/hw/sensors.default.so:system/lib/hw/sensors.shakira.so
 
 ## Other libraries and proprietary binaries
 PRODUCT_COPY_FILES += \
@@ -129,7 +166,6 @@ PRODUCT_COPY_FILES += \
     device/se/x8/prebuilt/ramdisk.tar:system/bin/ramdisk.tar \
     device/se/x8/prebuilt/sh:system/recovery/sh \
     device/se/x8/prebuilt/recovery.tar.bz2:system/recovery/recovery.tar.bz2 
-#    device/se/x8/prebuilt/busybox:system/bin/busybox \
 
 #offline charger
 PRODUCT_COPY_FILES += \
@@ -148,10 +184,10 @@ PRODUCT_COPY_FILES += \
 
 #audio
 PRODUCT_COPY_FILES += \
+    vendor/se/x8/proprietary/lib/libaudio.so:system/lib/libaudio.so \
     vendor/se/x8/proprietary/lib/libaudioeq.so:system/lib/libaudioeq.so \
     vendor/se/x8/proprietary/etc/AudioFilterProduct.csv:system/etc/AudioFilterProduct.csv \
     vendor/se/x8/proprietary/etc/AudioFilterPlatform.csv:system/etc/AudioFilterPlatform.csv 
-#    vendor/se/x8/proprietary/lib/libaudio.so:system/lib/libaudio.so 
 #    device/se/x8/prebuilt/AudioFilter.csv:system/etc/AudioFilter.csv \
 #    device/se/x8/prebuilt/AutoVolumeControl.txt:system/etc/AutoVolumeControl.txt\
 
@@ -167,14 +203,9 @@ PRODUCT_COPY_FILES += \
 #layout config
 PRODUCT_COPY_FILES += \
     device/se/x8/media_profiles.xml:system/etc/media_profiles.xml \
-    device/se/x8/dhcpcd.conf:system/etc/dhcpcd/dhcpcd.conf \
-    device/se/x8/vold.fstab:system/etc/vold.fstab \
     device/se/x8/prebuilt/hw_config.sh:system/etc/hw_config.sh \
     vendor/se/x8/proprietary/etc/sensors.conf:system/etc/sensors.conf \
-    vendor/se/x8/proprietary/usr/keylayout/shakira_keypad.kl:system/usr/keylayout/shakira_keypad.kl \
-    vendor/se/x8/proprietary/usr/keylayout/systemconnector.kl:system/usr/keylayout/systemconnector.kl \
-    vendor/se/x8/proprietary/usr/keychars/shakira_keypad.kcm.bin:system/usr/keychars/shakira_keypad.kcm.bin \
-    vendor/se/x8/proprietary/usr/keychars/systemconnector.kcm.bin:system/usr/keychars/systemconnector.kcm.bin \
+    vendor/se/x8/proprietary/etc/dhcpcd/dhcpcd.conf:system/etc/dhcpcd/dhcpcd.conf \
     vendor/se/x8/proprietary/etc/loc_parameter.ini:system/etc/loc_parameter.ini 
     
 #Kernel modules
@@ -196,12 +227,40 @@ PRODUCT_COPY_FILES += \
 PRODUCT_COPY_FILES += \
     device/se/x8/prebuilt/bootanimation.zip:system/media/bootanimation.zip 
 
+PRODUCT_PROPERTY_OVERRIDES := \
+    keyguard.no_require_sim=true \
+    ro.ril.hsxpa=1 \
+    ro.ril.gprsclass=10 \
+    ro.media.dec.jpeg.memcap=10000000
 
-$(call inherit-product, build/target/product/full_base.mk)
+PRODUCT_PROPERTY_OVERRIDES += \
+    rild.libpath=/system/lib/libril-qc-1.so \
+    rild.libargs=-d/dev/smd0 \
+    keyguard.no_require_sim=true \
+    ro.ril.hsxpa=2 \
+    ro.ril.gprsclass=10 \
+    ro.telephony.default_network=0 \
+    ro.telephony.call_ring.multiple=false \
+    wifi.interface=wlan0 \
+    wifi.supplicant_scan_interval=15 \
 
-PRODUCT_BUILD_PROP_OVERRIDES += BUILD_UTC_DATE=0
-PRODUCT_NAME := x8
-PRODUCT_DEVICE := x8
-PRODUCT_MODEL := SonyEricsson X8
 
-#CYANOGEN_WITH_GOOGLE := true
+PRODUCT_PROPERTY_OVERRIDES += \
+    ro.sf.lcd_density=160 \
+    ro.sf.hwrotation=180
+
+
+# we have enough storage space to hold precise GC data
+PRODUCT_TAGS += dalvik.gc.type-precise
+
+PRODUCT_PROPERTY_OVERRIDES += \
+    ro.com.google.locationfeatures=1 \
+    dalvik.vm.lockprof.threshold=500 \
+    dalvik.vm.dexopt-flags=m=y \
+    dalvik.vm.heapsize=32m \
+    dalvik.vm.execution-mode=int:jit \
+    dalvik.vm.dexopt-data-only=1 \
+    ro.opengles.version=131072  \
+    ro.compcache.default=0\
+    ro.product.locale.language=en \
+    ro.product.locale.region=US

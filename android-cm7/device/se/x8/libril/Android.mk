@@ -1,6 +1,6 @@
 # Copyright 2006 The Android Open Source Project
 
-ifeq ($(TARGET_BOOTLOADER_BOARD_NAME),shakira)
+ifeq ($(TARGET_BOOTLOADER_BOARD_NAME),shakiraa)
 
 LOCAL_PATH:= $(call my-dir)
 include $(CLEAR_VARS)

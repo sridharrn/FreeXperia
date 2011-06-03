@@ -15,7 +15,6 @@ done
 
 FILES="
 bin/akmd2
-bin/chargemon
 bin/dhcpcd
 bin/hciattach
 bin/nvimport

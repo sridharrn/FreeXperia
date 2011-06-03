@@ -16,7 +16,7 @@
 
 #include <math.h>
 
-#define LOG_NDEBUG 1
+//#define LOG_NDEBUG 0
 #define LOG_TAG "AudioHardwareMSM72XX"
 #include <utils/Log.h>
 #include <utils/String8.h>
@@ -34,9 +34,9 @@
 #include "AudioHardware.h"
 #include <media/AudioRecord.h>
 
-#define LOG_SND_RPC 1  // Set to 1 to log sound RPC's
+#define LOG_SND_RPC 0  // Set to 1 to log sound RPC's
 
-#define COMBO_DEVICE_SUPPORTED 1 // Headset speaker combo device not supported on this target
+#define COMBO_DEVICE_SUPPORTED 0 // Headset speaker combo device not supported on this target
 #define DUALMIC_KEY "dualmic_enabled"
 #define TTY_MODE_KEY "tty_mode"
 
@@ -73,17 +73,17 @@ static struct tx_agc tx_agc_cfg[9];
 
 static uint32_t SND_DEVICE_CURRENT=-1;
 static uint32_t SND_DEVICE_HANDSET=-1;
-static uint32_t SND_DEVICE_FARFIELD_OP=-1;
+static uint32_t SND_DEVICE_SPEAKER=-1;
 static uint32_t SND_DEVICE_BT=-1;
 static uint32_t SND_DEVICE_BT_EC_OFF=-1;
-static uint32_t SND_DEVICE_HEADPHONE=-1;
+static uint32_t SND_DEVICE_HEADSET=-1;
 static uint32_t SND_DEVICE_HEADSET_AND_SPEAKER=-1;
-static uint32_t SND_DEVICE_IN_S_SADC_OUT_HANDSET_OP=-1;
+static uint32_t SND_DEVICE_IN_S_SADC_OUT_HANDSET=-1;
 static uint32_t SND_DEVICE_IN_S_SADC_OUT_SPEAKER_PHONE=-1;
-static uint32_t SND_DEVICE_TTY=-1;
-static uint32_t SND_DEVICE_HCO=-1;
-static uint32_t SND_DEVICE_VCO=-1;
-static uint32_t SND_DEVICE_HAC=-1;
+static uint32_t SND_DEVICE_TTY_HEADSET=-1;
+static uint32_t SND_DEVICE_TTY_HCO=-1;
+static uint32_t SND_DEVICE_TTY_VCO=-1;
+static uint32_t SND_DEVICE_CARKIT=-1;
 static uint32_t SND_DEVICE_FM_SPEAKER=-1;
 static uint32_t SND_DEVICE_FM_HEADSET=-1;
 static uint32_t SND_DEVICE_NO_MIC_HEADSET=-1;
@@ -112,16 +112,19 @@ AudioHardware::AudioHardware() :
 #define CHECK_FOR(desc) if (!strcmp(ept->name, #desc)) SND_DEVICE_##desc = ept->id;
                 CHECK_FOR(CURRENT);
                 CHECK_FOR(HANDSET);
-                CHECK_FOR(FARFIELD_OP);
+                CHECK_FOR(SPEAKER);
                 CHECK_FOR(BT);
                 CHECK_FOR(BT_EC_OFF);
-                CHECK_FOR(HEADPHONE);
+                CHECK_FOR(HEADSET);
                 CHECK_FOR(HEADSET_AND_SPEAKER);
-                CHECK_FOR(IN_S_SADC_OUT_HANDSET_OP);
+                CHECK_FOR(IN_S_SADC_OUT_HANDSET);
                 CHECK_FOR(IN_S_SADC_OUT_SPEAKER_PHONE);
-                CHECK_FOR(TTY);
-                CHECK_FOR(HCO);
-                CHECK_FOR(VCO);
+                CHECK_FOR(TTY_HEADSET);
+                CHECK_FOR(TTY_HCO);
+                CHECK_FOR(TTY_VCO);
+                CHECK_FOR(FM_HEADSET);
+                CHECK_FOR(FM_SPEAKER);
+                
 #undef CHECK_FOR
             }
         }
@@ -394,10 +397,8 @@ status_t AudioHardware::setParameters(const String8& keyValuePairs)
         } else {
             mTtyMode = TTY_OFF;
         }
-    } else {
-        mTtyMode = TTY_OFF;
+        doRouting(NULL);
     }
-    doRouting(NULL);
 
     return NO_ERROR;
 }
@@ -855,7 +856,7 @@ static int msm72xx_enable_audpp(uint16_t enable_mask, uint32_t device)
     if (!audpp_filter_inited) return -EINVAL;
 
     LOGI("SET DEVICE - %d",device);
-    if(device == SND_DEVICE_FARFIELD_OP)
+    if(device == SND_DEVICE_SPEAKER)
     {
             device_id = 0;
             LOGI("SET DEVICE TO SND_DEVICE_SPEAKER device_id=0 .");
@@ -865,7 +866,7 @@ static int msm72xx_enable_audpp(uint16_t enable_mask, uint32_t device)
             device_id = 1;
              LOGI("SET DEVICE - SND_DEVICE_HANDSET device_id=1 .");
     }
-    if(device == SND_DEVICE_HEADPHONE)
+    if(device == SND_DEVICE_HEADSET)
     {
             device_id = 2;
             LOGI("SET DEVICE - SND_DEVICE_HEADSET device_id=2 .");
@@ -1036,7 +1037,7 @@ status_t AudioHardware::setVoiceVolume(float v)
     LOGD("setVoiceVolume(%f)\n", v);
     LOGI("Setting in-call volume to %d (available range is 0 to 7)\n", vol);
 
-    if ((mCurSndDevice != -1) && ((mCurSndDevice == SND_DEVICE_TTY) || (mCurSndDevice == SND_DEVICE_VCO)))
+    if ((mCurSndDevice != -1) && ((mCurSndDevice == SND_DEVICE_TTY_HEADSET) || (mCurSndDevice == SND_DEVICE_TTY_VCO)))
     {
         vol = 1;
         LOGI("For TTY device in FULL or VCO mode, the volume level is set to: %d \n", vol);
@@ -1053,10 +1054,10 @@ status_t AudioHardware::setMasterVolume(float v)
     int vol = ceil(v * 7.0);
     LOGI("Set master volume to %d.\n", vol);
     set_volume_rpc(SND_DEVICE_HANDSET, SND_METHOD_VOICE, vol, m7xsnddriverfd);
-    set_volume_rpc(SND_DEVICE_FARFIELD_OP, SND_METHOD_VOICE, vol, m7xsnddriverfd);
+    set_volume_rpc(SND_DEVICE_SPEAKER, SND_METHOD_VOICE, vol, m7xsnddriverfd);
     set_volume_rpc(SND_DEVICE_BT,      SND_METHOD_VOICE, vol, m7xsnddriverfd);
-    set_volume_rpc(SND_DEVICE_HEADPHONE, SND_METHOD_VOICE, vol, m7xsnddriverfd);
-    set_volume_rpc(SND_DEVICE_IN_S_SADC_OUT_HANDSET_OP, SND_METHOD_VOICE, vol, m7xsnddriverfd);
+    set_volume_rpc(SND_DEVICE_HEADSET, SND_METHOD_VOICE, vol, m7xsnddriverfd);
+    set_volume_rpc(SND_DEVICE_IN_S_SADC_OUT_HANDSET, SND_METHOD_VOICE, vol, m7xsnddriverfd);
     set_volume_rpc(SND_DEVICE_IN_S_SADC_OUT_SPEAKER_PHONE, SND_METHOD_VOICE, vol, m7xsnddriverfd);
     // We return an error code here to let the audioflinger do in-software
     // volume on top of the maximum volume that we set through the SND API.
@@ -1113,7 +1114,7 @@ static status_t do_route_audio_rpc(uint32_t device,
 status_t AudioHardware::doAudioRouteOrMute(uint32_t device)
 {
 #if 0
-    if (device == (uint32_t)SND_DEVICE_BT || device == (uint32_t)SND_DEVICE_HAC) {
+    if (device == (uint32_t)SND_DEVICE_BT || device == (uint32_t)SND_DEVICE_CARKIT) {
         if (mBluetoothId) {
             device = mBluetoothId;
         } else if (!mBluetoothNrec) {
@@ -1121,6 +1122,7 @@ status_t AudioHardware::doAudioRouteOrMute(uint32_t device)
         }
     }
 #endif
+	mMicMute = 0;
     LOGV("doAudioRouteOrMute() device %x, mMode %d, mMicMute %d", device, mMode, mMicMute);
     return do_route_audio_rpc(device,
                               mMode != AudioSystem::MODE_IN_CALL, mMicMute, m7xsnddriverfd);
@@ -1152,14 +1154,14 @@ status_t AudioHardware::doRouting(AudioStreamInMSM72xx *input)
                 sndDevice = SND_DEVICE_BT;
             } else if (inputDevice & AudioSystem::DEVICE_IN_WIRED_HEADSET) {
                     LOGI("Routing audio to Wired Headset\n");
-                    sndDevice = SND_DEVICE_HEADPHONE;
+                    sndDevice = SND_DEVICE_HEADSET;
             } else {
                 if (outputDevices & AudioSystem::DEVICE_OUT_SPEAKER) {
                     LOGI("Routing audio to Speakerphone\n");
-                    sndDevice = SND_DEVICE_FARFIELD_OP;
+                    sndDevice = SND_DEVICE_SPEAKER;
                     audProcess = (ADRC_ENABLE | EQ_ENABLE | RX_IIR_ENABLE );
                 } else {
-                    LOGI("Routing audio to HANDSET\n");
+                    LOGI("Routing audio to Handset\n");
                     sndDevice = SND_DEVICE_HANDSET;
                 }
             }
@@ -1179,13 +1181,13 @@ status_t AudioHardware::doRouting(AudioStreamInMSM72xx *input)
                 (outputDevices & AudioSystem::DEVICE_OUT_WIRED_HEADSET)) {
             if (mTtyMode == TTY_FULL) {
                 LOGI("Routing audio to TTY FULL Mode\n");
-                sndDevice = SND_DEVICE_TTY;
+                sndDevice = SND_DEVICE_TTY_HEADSET;
             } else if (mTtyMode == TTY_VCO) {
                 LOGI("Routing audio to TTY VCO Mode\n");
-                sndDevice = SND_DEVICE_VCO;
+                sndDevice = SND_DEVICE_TTY_VCO;
             } else if (mTtyMode == TTY_HCO) {
                 LOGI("Routing audio to TTY HCO Mode\n");
-                sndDevice = SND_DEVICE_HCO;
+                sndDevice = SND_DEVICE_TTY_HCO;
             }
         } else if (outputDevices &
                    (AudioSystem::DEVICE_OUT_BLUETOOTH_SCO | AudioSystem::DEVICE_OUT_BLUETOOTH_SCO_HEADSET)) {
@@ -1193,7 +1195,7 @@ status_t AudioHardware::doRouting(AudioStreamInMSM72xx *input)
             sndDevice = SND_DEVICE_BT;
         } else if (outputDevices & AudioSystem::DEVICE_OUT_BLUETOOTH_SCO_CARKIT) {
             LOGI("Routing audio to Bluetooth PCM\n");
-            sndDevice = SND_DEVICE_HAC;
+            sndDevice = SND_DEVICE_CARKIT;
 #ifdef COMBO_DEVICE_SUPPORTED
         } else if ((outputDevices & AudioSystem::DEVICE_OUT_WIRED_HEADSET) &&
                    (outputDevices & AudioSystem::DEVICE_OUT_SPEAKER)) {
@@ -1212,14 +1214,14 @@ status_t AudioHardware::doRouting(AudioStreamInMSM72xx *input)
 #endif
         } else if (outputDevices & AudioSystem::DEVICE_OUT_WIRED_HEADSET) {
             LOGI("Routing audio to Wired Headset\n");
-            sndDevice = SND_DEVICE_HEADPHONE;
+            sndDevice = SND_DEVICE_HEADSET;
             audProcess = (ADRC_ENABLE | EQ_ENABLE | RX_IIR_ENABLE );
         } else if (outputDevices & AudioSystem::DEVICE_OUT_SPEAKER) {
             LOGI("Routing audio to Speakerphone\n");
-            sndDevice = SND_DEVICE_FARFIELD_OP;
+            sndDevice = SND_DEVICE_SPEAKER;
             audProcess = (ADRC_ENABLE | EQ_ENABLE | RX_IIR_ENABLE );
         } else {
-            LOGI("Routing audio to HANDSET\n");
+            LOGI("Routing audio to Handset\n");
             sndDevice = SND_DEVICE_HANDSET;
             audProcess = (ADRC_ENABLE | EQ_ENABLE | RX_IIR_ENABLE );
         }
@@ -1227,9 +1229,9 @@ status_t AudioHardware::doRouting(AudioStreamInMSM72xx *input)
 
     if (mDualMicEnabled && mMode == AudioSystem::MODE_IN_CALL) {
         if (sndDevice == SND_DEVICE_HANDSET) {
-            LOGI("Routing audio to HANDSET with DualMike enabled\n");
-            sndDevice = SND_DEVICE_IN_S_SADC_OUT_HANDSET_OP;
-        } else if (sndDevice == SND_DEVICE_FARFIELD_OP) {
+            LOGI("Routing audio to handset with DualMike enabled\n");
+            sndDevice = SND_DEVICE_IN_S_SADC_OUT_HANDSET;
+        } else if (sndDevice == SND_DEVICE_SPEAKER) {
             LOGI("Routing audio to speakerphone with DualMike enabled\n");
             sndDevice = SND_DEVICE_IN_S_SADC_OUT_SPEAKER_PHONE;
         }
@@ -1493,7 +1495,6 @@ status_t AudioHardware::AudioStreamOutMSM72xx::setParameters(const String8& keyV
     if (param.getInt(key, device) == NO_ERROR) {
         mDevices = device;
         LOGV("set output routing %x", mDevices);
-        status = mHardware->setParameters(keyValuePairs);
         status = mHardware->doRouting(NULL);
         param.remove(key);
     }

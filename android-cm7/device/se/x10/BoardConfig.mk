@@ -10,6 +10,9 @@ BOARD_USE_USB_MASS_STORAGE_SWITCH := true
 TARGET_USE_CUSTOM_LUN_FILE_PATH := /sys/devices/platform/msm_hsusb/gadget/lun
 BOARD_UMS_LUN_FILE := /sys/devices/platform/msm_hsusb/gadget/lun0/file
 
+TARGET_USE_CUSTOM_VIBRATOR_FILE_PATH : /sys/devices/platform/msm_pmic_vibrator/enable
+
+
 #for video coder/decoder
 BOARD_USES_QCOM_HARDWARE := true
 BOARD_USES_QCOM_LIBS := true
@@ -31,7 +34,6 @@ TARGET_CPU_ABI := armeabi-v7a
 TARGET_CPU_ABI2 := armeabi
 TARGET_ARCH_VARIANT := armv7-a-neon
 ARCH_ARM_HAVE_TLS_REGISTER := true
-#ARCH_ARM_HAVE_VFP:=true
 
 TARGET_BOOTLOADER_BOARD_NAME := es209ra
 
@@ -48,6 +50,7 @@ BOARD_NO_RGBX_8888 := true
 BOARD_KERNEL_CMDLINE := mem=210 no_console_suspend console=null
 BOARD_KERNEL_BASE := 0x20000000
 
+TARGET_USES_OLD_LIBSENSORS_HAL := true
 BOARD_VENDOR_USE_AKMD := akm8973
 
 TARGET_PROVIDES_LIBRIL := true
@@ -60,8 +63,4 @@ BOARD_USERDATAIMAGE_PARTITION_SIZE :=0x1d100000
 BOARD_FLASH_BLOCK_SIZE             :=131072
 
 WITH_DEXPREOPT := true
-SKIP_THEMES := true
-
-#WITH_JIT := true
-#ENABLE_JSC_JIT := true
-#JS_ENGINE := jsc
+#SKIP_THEMES := true

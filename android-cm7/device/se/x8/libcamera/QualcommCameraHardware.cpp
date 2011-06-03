@@ -201,10 +201,10 @@ board_property boardProperties[] = {
  */
 //sorted on column basis
 static const camera_size_type picture_sizes[] = {
-//    { 2048, 1536 }, // 3MP QXGA
-//    { 1632, 1224 }, // 2MP UXGA
-//    { 1024, 768}, // 1MP XGA
-//    { 800, 480 }, // WVGA
+    { 2048, 1536 }, // 3MP QXGA
+    { 1632, 1224 }, // 2MP UXGA
+    { 1024, 768}, // 1MP XGA
+    { 800, 480 }, // WVGA
     { 640, 480 }, // VGA
     { 352, 288 }, //CIF
     { 320, 240 }, // QVGA

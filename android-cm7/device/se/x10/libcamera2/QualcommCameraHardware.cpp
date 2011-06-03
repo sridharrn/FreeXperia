@@ -172,7 +172,7 @@ union zoomimage
  */
 
 static const camera_size_type preview_sizes[] = {
-    { 1280, 720 },
+//    { 1280, 720 },
     { 1024, 480 },
     { 864, 480 },
     { 854, 480 },
@@ -202,14 +202,14 @@ board_property boardProperties[] = {
  */
 //sorted on column basis
 static const camera_size_type picture_sizes[] = {
-//    { 3264, 2448 },
-//    { 2592, 1944 },
-//    { 2048, 1536 },
-//    { 1920, 1080 },
-//    { 1632, 1224 },
-//    { 1280, 960 },
-//    { 1024, 480},
-//    { 854, 480 },
+    { 3264, 2448 },
+    { 2592, 1944 },
+    { 2048, 1536 },
+    { 1920, 1080 },
+    { 1632, 1224 },
+    { 1280, 960 },
+    { 1024, 480},
+    { 854, 480 },
     { 800, 480 },
     { 640, 480 },
     { 320, 240 },
@@ -241,16 +241,20 @@ typedef struct {
 static thumbnail_size_type thumbnail_sizes[] = {
 //    { 8722, 627, 480 },
 //    { 7281, 512, 288 }, //1.777778
-    { 6826, 480, 288 }, //1.666667
-    { 6144, 432, 288 }, //1.5
-    { 5461, 512, 384 }, //1.333333
-    { 5006, 352, 288 }, //1.222222
+//    { 6826, 480, 288 }, //1.666667
+//    { 6144, 432, 288 }, //1.5
+//    { 5461, 512, 384 }, //1.333333
+//    { 5006, 352, 288 }, //1.222222
+    { 5461, 800, 600 }, //1.333333
+    { 5461, 640, 480 }, //1.333333
+
 };
 #define THUMBNAIL_SIZE_COUNT (sizeof(thumbnail_sizes)/sizeof(thumbnail_size_type))
 #define DEFAULT_THUMBNAIL_SETTING 2
-#define THUMBNAIL_WIDTH_STR "512"
-#define THUMBNAIL_HEIGHT_STR "384"
-#define THUMBNAIL_SMALL_HEIGHT 144
+#define THUMBNAIL_WIDTH_STR "320"
+#define THUMBNAIL_HEIGHT_STR "240"
+#define THUMBNAIL_SMALL_HEIGHT 160
+//#define THUMBNAIL_SMALL_HEIGHT 144
 
 static int attr_lookup(const str_map arr[], int len, const char *name)
 {

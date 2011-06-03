@@ -3060,15 +3060,15 @@ fsg_function_bind(struct usb_configuration *c, struct usb_function *f, int type)
 	for (i = 0; i < fsg->nluns; ++i) {
 		curlun = &fsg->luns[i];
 
-		if (type == ANDROID_CDROM) {
-			lun_conf = fsg->cdev->cdrom_lun_conf;
-		} else if (type == ANDROID_MSC_CDROM) {
-			lun_conf = &fsg->cdev->msc_cdrom_lun_conf[i];
-		} else {
+//		if (type == ANDROID_CDROM) {
+//			lun_conf = fsg->cdev->cdrom_lun_conf;
+//		} else if (type == ANDROID_MSC_CDROM) {
+//			lun_conf = &fsg->cdev->msc_cdrom_lun_conf[i];
+//		} else {
 			lun_conf = fsg->cdev->msc_lun_conf;
-		}
-		curlun->is_cdrom = lun_conf->is_cdrom;
-		curlun->ro = curlun->is_cdrom ? 1: 0;
+//		}
+//		curlun->is_cdrom = lun_conf->is_cdrom;
+//		curlun->ro = curlun->is_cdrom ? 1: 0;
 		curlun->shift_size = lun_conf->shift_size;
 		curlun->can_stall = lun_conf->can_stall;
 		curlun->dev.release = lun_release;

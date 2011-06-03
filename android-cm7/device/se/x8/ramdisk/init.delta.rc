@@ -113,7 +113,7 @@ on early-init
     device /dev/akm8975_aot 0660 compass system
     device /dev/akm8975_dev 0660 compass system
 
-service dhcp-service /system/bin/netcfg wlan0 dhcp
+service dhcp-service /system/bin/netcfg tiwlan0 dhcp
     oneshot
 
 service wlan_loader /system/bin/tiwlan_loader \
@@ -124,17 +124,17 @@ service wlan_loader /system/bin/tiwlan_loader \
     oneshot
 
 
-service ifcfg_up /system/bin/ifconfig wlan0 up
+service ifcfg_up /system/bin/ifconfig tiwlan0 up
     disabled
     oneshot
 
 service wpa_supplicant /system/bin/wpa_supplicant \
-    -Dwlan0 -iwlan0 -c/data/misc/wifi/wpa_supplicant.conf -dd
-    socket wpa_wlan0 dgram 660 wifi wifi
+    -Dtiwlan0 -itiwlan0 -c/data/misc/wifi/wpa_supplicant.conf -dd
+    socket wpa_tiwlan0 dgram 660 wifi wifi
     disabled
     oneshot
 
-service dhcpcd /system/bin/dhcpcd -BKL -d wlan0
+service dhcpcd /system/bin/dhcpcd -BKL -d tiwlan0
     disabled
     oneshot
 
