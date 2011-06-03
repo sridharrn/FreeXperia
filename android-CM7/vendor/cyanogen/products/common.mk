@@ -97,7 +97,6 @@ PRODUCT_COPY_FILES += \
 
 ifdef CYANOGEN_WITH_GOOGLE
     PRODUCT_COPY_FILES += \
-        vendor/cyanogen/proprietary/GenieWidget.apk:./system/app/GenieWidget.apk \
         vendor/cyanogen/proprietary/GoogleBackupTransport.apk:./system/app/GoogleBackupTransport.apk \
         vendor/cyanogen/proprietary/GoogleCalendarSyncAdapter.apk:./system/app/GoogleCalendarSyncAdapter.apk \
         vendor/cyanogen/proprietary/GoogleContactsSyncAdapter.apk:./system/app/GoogleContactsSyncAdapter.apk \
@@ -118,6 +117,7 @@ ifdef CYANOGEN_WITH_GOOGLE
         vendor/cyanogen/proprietary/com.google.android.maps.jar:./system/framework/com.google.android.maps.jar \
         vendor/cyanogen/proprietary/libtalk_jni.so:./system/lib/libtalk_jni.so \
         vendor/cyanogen/proprietary/libvoicesearch.so:./system/lib/libvoicesearch.so
+#        vendor/cyanogen/proprietary/GenieWidget.apk:./system/app/GenieWidget.apk \
 
 else
     PRODUCT_PACKAGES += \

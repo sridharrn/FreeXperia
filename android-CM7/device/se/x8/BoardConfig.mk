@@ -24,8 +24,6 @@ WIFI_FIRMWARE_LOADER := wlan_loader
 BOARD_USE_USB_MASS_STORAGE_SWITCH := true
 TARGET_USE_CUSTOM_LUN_FILE_PATH := /sys/devices/platform/msm_hsusb/gadget/lun
 
-TARGET_USE_CUSTOM_VIBRATOR_FILE_PATH : /sys/devices/platform/msm_pmic_vibrator/enable
-
 
 TARGET_BOARD_PLATFORM := msm7k
 TARGET_ARCH_VARIANT := armv6-vfp

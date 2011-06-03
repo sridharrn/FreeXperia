@@ -3,9 +3,19 @@ $(call inherit-product, $(SRC_TARGET_DIR)/product/full_base.mk)
 $(call inherit-product, device/common/gps/gps_eu_supl.mk)
 
 # Discard inherited values and use our own instead.
-PRODUCT_NAME := X10
-PRODUCT_DEVICE := X10
-PRODUCT_MODEL := X10
+PRODUCT_NAME := x10
+PRODUCT_DEVICE := x10
+PRODUCT_MODEL := x10
+
+ifeq ($(TARGET_PREBUILT_KERNEL),)
+LOCAL_KERNEL := device/se/x10/kernel
+else
+LOCAL_KERNEL := $(TARGET_PREBUILT_KERNEL)
+endif
+
+PRODUCT_COPY_FILES += \
+    $(LOCAL_KERNEL):kernel
+
 
 PRODUCT_PACKAGES += \
     gps.qsd8k \
@@ -18,9 +28,6 @@ PRODUCT_PACKAGES += \
     libmm-omxcore \
     SETorch \
     LiveWallpapersPicker
-
-
-#    sensors.es209ra \
     
 # proprietary side of the device
 $(call inherit-product-if-exists, vendor/se/x10/x10-vendor.mk)
@@ -47,7 +54,6 @@ PRODUCT_COPY_FILES += \
 PRODUCT_COPY_FILES += \
 	device/se/x10/es209ra_handset.kl:system/usr/keylayout/es209ra_handset.kl \
 	device/se/x10/es209ra_keypad.kl:system/usr/keylayout/es209ra_keypad.kl 
-#	device/se/x10/es209ra_keypad.kcm.bin:system/usr/keychars/es209ra_keypad.kcm.bin 
 
 # These are the hardware-specific features
 PRODUCT_COPY_FILES += \
@@ -65,23 +71,9 @@ PRODUCT_COPY_FILES += \
 	frameworks/base/data/etc/android.software.sip.voip.xml:system/etc/permissions/android.software.sip.voip.xml \
 	packages/wallpapers/LivePicker/android.software.live_wallpaper.xml:system/etc/permissions/android.software.live_wallpaper.xml
 
-
-ifeq ($(TARGET_PREBUILT_KERNEL),)
-LOCAL_KERNEL := device/se/x10/kernel
-else
-LOCAL_KERNEL := $(TARGET_PREBUILT_KERNEL)
-endif
-
-PRODUCT_COPY_FILES += \
-    $(LOCAL_KERNEL):kernel
-
-
-
-
-## OMX Video decoder 
+# OMX Video decoder 
 #PRODUCT_COPY_FILES += \
 #    device/se/x10/prebuilt/libOmxVdec.so:system/lib/libOmxVdec.so
-
 
 ## RIL related stuff 
 PRODUCT_COPY_FILES += \
@@ -116,7 +108,6 @@ PRODUCT_COPY_FILES += \
     vendor/se/x10/proprietary/etc/firmware/yamato_pm4.fw:system/etc/firmware/yamato_pm4.fw \
     vendor/se/x10/proprietary/etc/firmware/camfirm.bin:system/etc/firmware/camfirm.bin 
 
-
 ## Atheros AR6002 firmware
 PRODUCT_COPY_FILES += \
     device/se/x10/prebuilt/ar6000.ko:system/lib/modules/ar6000.ko \
@@ -127,13 +118,11 @@ PRODUCT_COPY_FILES += \
     vendor/se/x10/proprietary/bin/eeprom.AR6002:system/bin/eeprom.AR6002 \
     vendor/se/x10/proprietary/bin/recEvent:system/bin/recEvent \
     vendor/se/x10/proprietary/bin/wmiconfig:system/bin/wmiconfig 
-    
 
 ## BT proprietary
 PRODUCT_COPY_FILES += \
     vendor/se/x10/proprietary/bin/hci_qcomm_init:system/bin/hci_qcomm_init \
     device/se/x10/prebuilt/init.bt.sh:system/etc/init.bt.sh 
-
 
 ## Adreno 200 files
 PRODUCT_COPY_FILES += \
@@ -142,8 +131,6 @@ PRODUCT_COPY_FILES += \
     vendor/se/x10/proprietary/lib/egl/libq3dtools_adreno200.so:system/lib/egl/libq3dtools_adreno200.so \
     vendor/se/x10/proprietary/lib/egl/libEGL_adreno200.so:system/lib/egl/libEGL_adreno200.so \
     vendor/se/x10/proprietary/lib/egl/libGLESv2_adreno200.so:system/lib/egl/libGLESv2_adreno200.so 
-
-
 
 ## Other libraries and proprietary binaries
 PRODUCT_COPY_FILES += \
@@ -173,7 +160,6 @@ PRODUCT_COPY_FILES += \
 #various fixes
 PRODUCT_COPY_FILES += \
     device/se/x10/media_profiles.xml:system/etc/media_profiles.xml \
-    device/se/x10/vold.fstab:system/etc/vold.fstab \
     device/se/x10/prebuilt/gps.conf:system/etc/gps.conf \
     device/se/x10/prebuilt/wpa_supplicant.conf:system/etc/wifi/wpa_supplicant.conf \
     vendor/se/x10/proprietary/etc/dhcpcd/dhcpcd-hooks/01-test:system/etc/dhcpcd/dhcpcd-hooks/01-test \
@@ -186,7 +172,7 @@ PRODUCT_COPY_FILES += \
 PRODUCT_COPY_FILES += \
     device/se/x10/prebuilt/boot.img:system/kernel/boot.img \
     device/se/x10/prebuilt/miniloader:system/kernel/miniloader \
-    device/se/x10/prebuilt/splboot.ko:system/kernel/splboot.ko \
+    device/se/x10/prebuilt/splboot.ko:system/kernel/splboot.ko 
 
 #FreeXperia BootLogo
 PRODUCT_COPY_FILES += \
@@ -207,7 +193,7 @@ PRODUCT_PROPERTY_OVERRIDES += \
     ro.telephony.default_network=0 \
     ro.telephony.call_ring.multiple=false \
     wifi.interface=wlan0 \
-    wifi.supplicant_scan_interval=15 \
+    wifi.supplicant_scan_interval=15 
 
 #MT 
 PRODUCT_PROPERTY_OVERRIDES += \

@@ -1,5 +1,5 @@
-# Inherit AOSP device configuration for x10.
-$(call inherit-product, device/se/x10/device_x10.mk)
+# Inherit AOSP device configuration for Play.
+$(call inherit-product, device/se/play/device_play.mk)
 
 # Inherit some common cyanogenmod stuff.
 $(call inherit-product, vendor/cyanogen/products/common_full.mk)
@@ -10,26 +10,26 @@ $(call inherit-product, vendor/cyanogen/products/gsm.mk)
 #
 # Setup device specific product configuration.
 #
-PRODUCT_NAME := cyanogen_x10
+PRODUCT_NAME := cyanogen_play
 PRODUCT_BRAND := SE
-PRODUCT_DEVICE := x10
-PRODUCT_MODEL := X10
+PRODUCT_DEVICE := play
+PRODUCT_MODEL := Play
 PRODUCT_MANUFACTURER := Sony Ericsson
-PRODUCT_BUILD_PROP_OVERRIDES += PRODUCT_NAME=cyanogen_X10 BUILD_ID=GRI40 BUILD_DISPLAY_ID=GRJ22 BUILD_FINGERPRINT=google/passion/passion:2.3.3/GRI40/102588:user/release-keys PRIVATE_BUILD_DESC="passion-user 2.3.3 GRI40 102588 release-keys"
+PRODUCT_BUILD_PROP_OVERRIDES += PRODUCT_NAME=cyanogen_Play BUILD_ID=GRI40 BUILD_DISPLAY_ID=GRJ22 BUILD_FINGERPRINT=google/passion/passion:2.3.3/GRI40/102588:user/release-keys PRIVATE_BUILD_DESC="passion-user 2.3.3 GRI40 102588 release-keys"
 
 #
 # Set ro.modversion
 #
 ifdef CYANOGEN_NIGHTLY
     PRODUCT_PROPERTY_OVERRIDES += \
-        ro.modversion=CyanogenMod-7-$(shell date +%m%d%Y)-NIGHTLY-X10
+        ro.modversion=CyanogenMod-7-$(shell date +%m%d%Y)-NIGHTLY-Play
 else
     ifdef CYANOGEN_RELEASE
         PRODUCT_PROPERTY_OVERRIDES += \
-            ro.modversion=CyanogenMod-7.1.0-RC0-X10
+            ro.modversion=CyanogenMod-7.1.0-RC0-Play
     else
         PRODUCT_PROPERTY_OVERRIDES += \
-            ro.modversion=CyanogenMod-7.1.0-RC0-X10-J003
+            ro.modversion=CyanogenMod-7.1.0-RC0-Play-J001
     endif
 endif
 

@@ -10,9 +10,6 @@ BOARD_USE_USB_MASS_STORAGE_SWITCH := true
 TARGET_USE_CUSTOM_LUN_FILE_PATH := /sys/devices/platform/msm_hsusb/gadget/lun
 BOARD_UMS_LUN_FILE := /sys/devices/platform/msm_hsusb/gadget/lun0/file
 
-TARGET_USE_CUSTOM_VIBRATOR_FILE_PATH : /sys/devices/platform/msm_pmic_vibrator/enable
-
-
 #for video coder/decoder
 BOARD_USES_QCOM_HARDWARE := true
 BOARD_USES_QCOM_LIBS := true

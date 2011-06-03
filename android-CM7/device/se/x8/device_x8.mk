@@ -3,9 +3,9 @@ $(call inherit-product, $(SRC_TARGET_DIR)/product/full_base.mk)
 $(call inherit-product, device/common/gps/gps_eu_supl.mk)
 
 # Discard inherited values and use our own instead.
-PRODUCT_NAME := X8
-PRODUCT_DEVICE := X8
-PRODUCT_MODEL := X8
+PRODUCT_NAME := x8
+PRODUCT_DEVICE := x8
+PRODUCT_MODEL := x8
 
 PRODUCT_PACKAGES += \
     gps.shakira \
