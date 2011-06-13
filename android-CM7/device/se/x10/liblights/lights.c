@@ -200,6 +200,9 @@ set_speaker_light_locked(struct light_device_t* dev,
     }
 
         if (blink) {
+            write_int(RED_LED_FILE, red);
+            write_int(GREEN_LED_FILE, green);
+            write_int(BLUE_LED_FILE, blue);
             write_int(RED_FREQ_FILE, freq);
             write_int(RED_PWM_FILE, pwm);
             write_int(GREEN_FREQ_FILE, freq);
@@ -208,6 +211,9 @@ set_speaker_light_locked(struct light_device_t* dev,
             write_int(BLUE_PWM_FILE, pwm);
         }
         else{ 
+        write_int(RED_LED_FILE, 0);
+        write_int(GREEN_LED_FILE, 0);
+        write_int(BLUE_LED_FILE, 0);
         write_int(RED_FREQ_FILE, blink);
         write_int(GREEN_FREQ_FILE, blink);
         write_int(BLUE_FREQ_FILE, blink);
