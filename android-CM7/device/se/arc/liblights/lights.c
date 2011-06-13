@@ -220,8 +220,8 @@ set_speaker_light_locked(struct light_device_t* dev,
 	        write_int(GREEN_LED_FILE, 0);
 	        write_int(BLUE_LED_FILE, 0);
 	    }
-        }
-        write_int(RED_BLINK_FILE, blink);
+//        }
+//        write_int(RED_BLINK_FILE, blink);
 //    } else {
 //        write_int(AMBER_BLINK_FILE, blink);
 //    }
