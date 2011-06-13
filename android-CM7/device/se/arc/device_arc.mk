@@ -16,10 +16,13 @@ endif
 
 PRODUCT_COPY_FILES += \
     $(LOCAL_KERNEL):kernel
+
 PRODUCT_PACKAGES += \
     librs_jni \
-    gralloc.msm7x30 \
-    overlay.default \
+    gralloc.semc \
+    overlay.semc \
+    lights.semc \
+    libaudio \
     libOmxCore \
     libOmxVenc \
     libOmxVdec \
@@ -30,7 +33,7 @@ $(call inherit-product-if-exists, vendor/se/arc/arc-vendor.mk)
 
 DISABLE_DEXPREOPT := false
 
-#PRODUCT_SPECIFIC_DEFINES += TARGET_PRELINKER_MAP=$(TOP)/device/se/arc/prelink-linux-arm-arc.map
+PRODUCT_SPECIFIC_DEFINES += TARGET_PRELINKER_MAP=$(TOP)/device/se/arc/prelink-linux-arm-arc.map
 
 # These is the hardware-specific overlay, which points to the location
 # of hardware-specific resource overrides, typically the frameworks and
@@ -41,8 +44,8 @@ DEVICE_PACKAGE_OVERLAYS := device/se/arc/overlay
 PRODUCT_COPY_FILES := \
 	device/se/arc/media_profiles.xml:system/etc/media_profiles.xml \
 	device/se/arc/prebuilt/chargemon:system/bin/chargemon \
-	device/se/arc/prebuilt/model:system/recovery/model 
-#	device/se/arc/prebuilt/egl.cfg:system/lib/egl/egl.cfg \
+	device/se/arc/prebuilt/model:system/recovery/model \
+	device/se/arc/prebuilt/gps.conf:system/etc/gps.conf 
 
 # Init files
 PRODUCT_COPY_FILES += \
@@ -89,6 +92,8 @@ PRODUCT_COPY_FILES += \
     vendor/se/arc/proprietary/lib/libqmi.so:system/lib/libqmi.so \
     vendor/se/arc/proprietary/lib/libqueue.so:system/lib/libqueue.so \
     vendor/se/arc/proprietary/lib/libril-qc-1.so:system/lib/libril-qc-1.so \
+    vendor/se/arc/proprietary/lib/libuim.so:system/lib/libuim.so \
+    vendor/se/arc/proprietary/lib/libril.so:system/lib/libril.so \
     vendor/se/arc/proprietary/lib/libwms.so:system/lib/libwms.so \
     vendor/se/arc/proprietary/lib/libwmsts.so:system/lib/libwmsts.so
 
@@ -96,9 +101,8 @@ PRODUCT_COPY_FILES += \
 PRODUCT_COPY_FILES += \
     vendor/se/arc/proprietary/lib/liboemcamera.so:system/lib/liboemcamera.so \
     vendor/se/arc/proprietary/lib/libmmjpeg.so:system/lib/libmmjpeg.so \
+    vendor/se/arc/proprietary/lib/libcamera.so:system/lib/libcamera.so \
     vendor/se/arc/proprietary/lib/libmmipl.so:system/lib/libmmipl.so 
-
-#    vendor/se/arc/proprietary/lib/libcamera.so:system/lib/libcamera.so \
 
 ## FIRMWARE
 PRODUCT_COPY_FILES += \
@@ -153,7 +157,8 @@ PRODUCT_COPY_FILES += \
 
 ## Other libraries and proprietary binaries
 PRODUCT_COPY_FILES += \
-	vendor/se/arc/proprietary/etc/vold.fstab:system/etc/vold.fstab \
+    vendor/se/arc/proprietary/etc/als_curve.conf:system/etc/als_curve.conf \
+    vendor/se/arc/proprietary/etc/vold.fstab:system/etc/vold.fstab \
     vendor/se/arc/proprietary/etc/hw_config.sh:system/etc/hw_config.sh \
     vendor/se/arc/proprietary/etc/sensors.conf:system/etc/sensors.conf \
     vendor/se/arc/proprietary/bin/akmd8975:system/bin/akmd8975

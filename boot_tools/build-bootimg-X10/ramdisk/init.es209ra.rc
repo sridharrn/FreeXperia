@@ -12,7 +12,7 @@ service hostapd /system/bin/hostapd /etc/wifi/hostapd.conf
 service dhcp-service /system/bin/netcfg eth0 dhcp
 	oneshot
 
-service dhcpcd /system/bin/dhcpcd -B wlan0
+service dhcpcd_wlan0 /system/bin/dhcpcd -BKL
     disabled
     oneshot
 
