@@ -33,7 +33,7 @@ $(call inherit-product-if-exists, vendor/se/arc/arc-vendor.mk)
 
 DISABLE_DEXPREOPT := false
 
-PRODUCT_SPECIFIC_DEFINES += TARGET_PRELINKER_MAP=$(TOP)/device/se/arc/prelink-linux-arm-arc.map
+#PRODUCT_SPECIFIC_DEFINES += TARGET_PRELINKER_MAP=$(TOP)/device/se/arc/prelink-linux-arm-arc.map
 
 # These is the hardware-specific overlay, which points to the location
 # of hardware-specific resource overrides, typically the frameworks and
@@ -74,6 +74,7 @@ PRODUCT_COPY_FILES += \
 
 ## RIL related stuff 
 PRODUCT_COPY_FILES += \
+    device/se/arc/prebuilt/libril.so:system/lib/libril.so \
     vendor/se/arc/proprietary/bin/port-bridge:system/bin/port-bridge \
     vendor/se/arc/proprietary/bin/qmuxd:system/bin/qmuxd \
     vendor/se/arc/proprietary/lib/libauth.so:system/lib/libauth.so \
@@ -91,17 +92,16 @@ PRODUCT_COPY_FILES += \
     vendor/se/arc/proprietary/lib/libpbmlib.so:system/lib/libpbmlib.so \
     vendor/se/arc/proprietary/lib/libqmi.so:system/lib/libqmi.so \
     vendor/se/arc/proprietary/lib/libqueue.so:system/lib/libqueue.so \
-    vendor/se/arc/proprietary/lib/libril-qc-1.so:system/lib/libril-qc-1.so \
     vendor/se/arc/proprietary/lib/libuim.so:system/lib/libuim.so \
-    vendor/se/arc/proprietary/lib/libril.so:system/lib/libril.so \
+    device/se/arc/proprietary/lib/libril-qc-1.so:system/lib/libril-qc-1.so \
     vendor/se/arc/proprietary/lib/libwms.so:system/lib/libwms.so \
     vendor/se/arc/proprietary/lib/libwmsts.so:system/lib/libwmsts.so
 
 ## Camera proprietaries
 PRODUCT_COPY_FILES += \
-    vendor/se/arc/proprietary/lib/liboemcamera.so:system/lib/liboemcamera.so \
+    device/se/arc/prebuilt/libcamera.so:system/lib/libcamera.so \
+    device/se/arc/prebuilt/liboemcamera.so:system/lib/liboemcamera.so \
     vendor/se/arc/proprietary/lib/libmmjpeg.so:system/lib/libmmjpeg.so \
-    vendor/se/arc/proprietary/lib/libcamera.so:system/lib/libcamera.so \
     vendor/se/arc/proprietary/lib/libmmipl.so:system/lib/libmmipl.so 
 
 ## FIRMWARE
@@ -167,14 +167,14 @@ PRODUCT_COPY_FILES += \
 PRODUCT_COPY_FILES += \
     vendor/se/arc/proprietary/bin/updatemiscta:system/bin/updatemiscta \
     vendor/se/arc/proprietary/lib/libmiscta.so:system/lib/libmiscta.so \
-    vendor/se/arc/proprietary/semc/chargemon/data/charging_animation_01.png:system/etc/chargemon/charging_01.png \
-    vendor/se/arc/proprietary/semc/chargemon/data/charging_animation_02.png:system/etc/chargemon/charging_02.png \
-    vendor/se/arc/proprietary/semc/chargemon/data/charging_animation_03.png:system/etc/chargemon/charging_03.png \
-    vendor/se/arc/proprietary/semc/chargemon/data/charging_animation_04.png:system/etc/chargemon/charging_04.png \
-    vendor/se/arc/proprietary/semc/chargemon/data/charging_animation_05.png:system/etc/chargemon/charging_05.png \
-    vendor/se/arc/proprietary/semc/chargemon/data/charging_animation_06.png:system/etc/chargemon/charging_06.png \
-    vendor/se/arc/proprietary/semc/chargemon/data/charging_animation_07.png:system/etc/chargemon/charging_07.png \
-    vendor/se/arc/proprietary/semc/chargemon/data/charging_animation_blank.png:system/etc/chargemon/charging_blank.png
+    device/se/arc/prebuilt/charging_animation_01.png:system/etc/chargemon/charging_01.png \
+    device/se/arc/prebuilt/charging_animation_02.png:system/etc/chargemon/charging_02.png \
+    device/se/arc/prebuilt/charging_animation_03.png:system/etc/chargemon/charging_03.png \
+    device/se/arc/prebuilt/charging_animation_04.png:system/etc/chargemon/charging_04.png \
+    device/se/arc/prebuilt/charging_animation_05.png:system/etc/chargemon/charging_05.png \
+    device/se/arc/prebuilt/charging_animation_06.png:system/etc/chargemon/charging_06.png \
+    device/se/arc/prebuilt/charging_animation_07.png:system/etc/chargemon/charging_07.png \
+    device/se/arc/prebuilt/charging_animation_blank.png:system/etc/chargemon/charging_blank.png
 
 
 #various fixes
