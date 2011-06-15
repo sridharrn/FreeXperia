@@ -163,6 +163,18 @@ void gr_flip(void)
     set_active_framebuffer(gr_active_fb);
 }
 
+#ifdef BOARD_HAS_BGRA8888
+void gr_color(unsigned char r, unsigned char g, unsigned char b, unsigned char a)
+{
+    GGLContext *gl = gr_context;
+    GGLint color[4];
+    color[0] = ((b << 3) | (b >> 2);
+    color[1] = ((g << 3) | (g >> 2);
+    color[2] = ((r << 3) | (r >> 2);
+    color[3] = ((a << 3) | (a >> 2);
+    gl->color4xv(gl, color);
+}
+#else
 void gr_color(unsigned char r, unsigned char g, unsigned char b, unsigned char a)
 {
     GGLContext *gl = gr_context;
@@ -173,7 +185,7 @@ void gr_color(unsigned char r, unsigned char g, unsigned char b, unsigned char a
     color[3] = ((a << 8) | a) + 1;
     gl->color4xv(gl, color);
 }
-
+#endif
 int gr_measure(const char *s)
 {
     return gr_font->cwidth * strlen(s);
