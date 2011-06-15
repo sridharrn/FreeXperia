@@ -22,19 +22,21 @@ on early-boot
     # Start the offline charging (This blocks booting further in some cases)
     exec /system/bin/chargemon
 
-service updatemiscta /system/bin/updatemiscta
-    user root
-    oneshot
+#    # Make sure the crashdump level file is writable by Debug Menu > Crash Level
+
+#service updatemiscta /system/bin/updatemiscta
+#    user root
+#    oneshot
 
 #service iddd /system/bin/iddd
 #    user idd
 #    group idd log
 
 # Set the startup flag to boot complete, run on property change
-service setssflagbc /system/bin/startupflag bootcomplete
-    user root
-    oneshot
-    disabled
+#service setssflagbc /system/bin/startupflag bootcomplete
+#    user root
+#    oneshot
+#    disabled
 
 # AT+CTSA and AT+CKPD support
 #service atfwd-daemon /system/bin/atfwd-daemon
@@ -46,12 +48,12 @@ service setssflagbc /system/bin/startupflag bootcomplete
 #    start atfwd-daemon
 
 # DRM key activation
-#service suntrolkac /system/bin/suntrolkac
-#    user root
-#    oneshot
+service suntrolkac /system/bin/suntrolkac
+    user root
+    oneshot
 
 #on property:kernel.log=logcat
-#  stop klogrouterd
+#   stop klogrouterd
 #   start klogrouterd
 
 #on property:kernel.log=uart
@@ -64,9 +66,6 @@ service setssflagbc /system/bin/startupflag bootcomplete
 
 #service klogrouterd /system/bin/klogrouter logcat
 #    oneshot
-
-
-
 
 #on early-fs
 #    # Get potential ram dump from cache partition before it's needed
@@ -170,7 +169,7 @@ on boot
     chown system system /sys/devices/i2c-0/0-0038/rate
     chown system system /sys/devices/i2c-4/4-0038/rate
 
-    class_start default
+#    class_start default
 
     # insert SDIO-driver used by TI Wilink driver.
     # This is _not_ the default SDIO driver included in the kernel.
@@ -179,20 +178,19 @@ on boot
     # Create the directories and files expected by the lcatp service
     # only found in eng builds
 
-
 on property:init.svc.bluetoothd=running
     write /sys/devices/virtual/bluetooth/hci0/link_supervision_timeout 6400
 
-service nvcustomizer /system/bin/nvcustomizer
-    user root
-    oneshot
+#service nvcustomizer /system/bin/nvcustomizer
+#    user root
+#    oneshot
 
 # Copy calibration data from NV to kernel drivers
-service nvimport /system/bin/nvimport
-    user root
-    oneshot
+#service nvimport /system/bin/nvimport
+#    user root
+#    oneshot
 
-service wlan_loader /system/bin/tiwlan_loader -i /etc/wifi/tiwlan.ini -f /etc/wifi/tiwlan_firmware.bin -e /data/etc/wifi/fw
+service wlan_loader /system/bin/tiwlan_loader -i /etc/tiwlan.ini -f /etc/tiwlan_firmware.bin -e /data/etc/wifi/fw
     disabled
     oneshot
 
@@ -215,7 +213,7 @@ service hciattach /system/bin/hciattach -n /dev/ttyHS0 texas 3000000
     disabled
     oneshot
 
-service wlan_ap_loader /system/bin/tiap_loader -i /system/etc/wifi/softap/tiwlan_ap.ini -f /system/etc/wifi/softap/tiwlan_firmware_ap.bin -e /data/etc/wifi/fw
+service wlan_ap_loader /system/bin/tiap_loader -i /system/etc/wifi/softap/tiwlan_ap.ini -f /system/etc/wifi/softap/softap_firmware.bin -e /data/etc/wifi/fw
     disabled
     oneshot
 
@@ -237,9 +235,8 @@ service port-bridge /system/bin/port-bridge /dev/smd0 /dev/ttyGS0 &
     disabled
     oneshot
 
-
-
 service qmuxd /system/bin/qmuxd
+
 
 service akmd8975 /system/bin/akmd8975
 
@@ -251,46 +248,46 @@ service hw_config /system/bin/sh /system/etc/hw_config.sh
 	user root
 	oneshot
 
-on property:persist.service.adb.enable=1
-    exec /init.usbmode.sh
+#on property:persist.service.adb.enable=1
+#    exec /init.usbmode.sh
 
-on property:persist.service.adb.enable=0
-    exec /init.usbmode.sh
+#on property:persist.service.adb.enable=0
+#    exec /init.usbmode.sh
 
-on property:persist.usb.eng=1
-    exec /init.usbmode.sh
+#on property:persist.usb.eng=1
+#    exec /init.usbmode.sh
 
-on property:persist.usb.eng=0
-    exec /init.usbmode.sh
+#on property:persist.usb.eng=0
+#    exec /init.usbmode.sh
 
-on property:usb.rndis.enable=1
-    exec /init.usbmode.sh
+#on property:usb.rndis.enable=1
+#    exec /init.usbmode.sh
 
-on property:usb.rndis.enable=0
-    exec /init.usbmode.sh
+#on property:usb.rndis.enable=0
+#    exec /init.usbmode.sh
 
-on property:persist.usb.storagemode=msc
-    exec /init.usbmode.sh
+#on property:persist.usb.storagemode=msc
+#    exec /init.usbmode.sh
 
-on property:persist.usb.storagemode=mtp
-    exec /init.usbmode.sh
+#on property:persist.usb.storagemode=mtp
+#    exec /init.usbmode.sh
 
-on property:usb.pcc.enable=1
-    exec /init.usbmode.sh
+#on property:usb.pcc.enable=1
+#    exec /init.usbmode.sh
 
-on property:usb.pcc.enable=0
-    exec /init.usbmode.sh
+#on property:usb.pcc.enable=0
+#    exec /init.usbmode.sh
 
 service hdmid /system/bin/hdmid
     user  system
     group inet
 
-service touchd /system/bin/touchd
-    user root
+#service touchd /system/bin/touchd
+#    user root
 
-on early-boot
-    # Start touch firmware loader
-    exec /system/bin/cy8ctma300_fwloader -dev /sys/devices/platform/spi_qsd.0/spi0.0 -no_condition
+#on early-boot
+#    # Start touch firmware loader
+#    exec /system/bin/cy8ctma300_fwloader -dev /sys/devices/platform/spi_qsd.0/spi0.0 -no_condition
 
 on boot
     chown system system /sys/kernel/hdmi_sii_kset/hdmi_sii_kobj/hdmi_sii_state_obj
@@ -300,5 +297,3 @@ on boot
     chown system system /dev/uio0
 
     exec /system/bin/usbeng
-    
-

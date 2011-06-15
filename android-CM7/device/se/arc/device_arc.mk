@@ -20,7 +20,10 @@ PRODUCT_COPY_FILES += \
 PRODUCT_PACKAGES += \
     librs_jni \
     gralloc.semc \
+    gralloc.msm7x30 \
     overlay.semc \
+    overlay.msm7x30 \
+    gps.semc \
     lights.semc \
     libaudio \
     libOmxCore \
@@ -93,7 +96,7 @@ PRODUCT_COPY_FILES += \
     vendor/se/arc/proprietary/lib/libqmi.so:system/lib/libqmi.so \
     vendor/se/arc/proprietary/lib/libqueue.so:system/lib/libqueue.so \
     vendor/se/arc/proprietary/lib/libuim.so:system/lib/libuim.so \
-    device/se/arc/proprietary/lib/libril-qc-1.so:system/lib/libril-qc-1.so \
+    vendor/se/arc/proprietary/lib/libril-qc-1.so:system/lib/libril-qc-1.so \
     vendor/se/arc/proprietary/lib/libwms.so:system/lib/libwms.so \
     vendor/se/arc/proprietary/lib/libwmsts.so:system/lib/libwmsts.so
 
@@ -103,6 +106,7 @@ PRODUCT_COPY_FILES += \
     device/se/arc/prebuilt/liboemcamera.so:system/lib/liboemcamera.so \
     vendor/se/arc/proprietary/lib/libmmjpeg.so:system/lib/libmmjpeg.so \
     vendor/se/arc/proprietary/lib/libmmipl.so:system/lib/libmmipl.so 
+#    device/se/arc/prebuilt/libcamera.so:obj/lib/libcamera.so \
 
 ## FIRMWARE
 PRODUCT_COPY_FILES += \
@@ -134,11 +138,13 @@ PRODUCT_COPY_FILES += \
 PRODUCT_COPY_FILES += \
     vendor/se/arc/proprietary/etc/wifi/tiwlan.ini:system/etc/wifi/tiwlan.ini \
     vendor/se/arc/proprietary/etc/wifi/tiwlan_firmware.bin:system/etc/wifi/tiwlan_firmware.bin \
-    vendor/se/arc/proprietary/etc/wifi/wpa_supplicant.conf:system/etc/wifi/wpa_supplicant.conf \
-    vendor/se/arc/proprietary/etc/wifi/softap/hostapd.conf:system/etc/wifi/softap/hostapd.conf \
     vendor/se/arc/proprietary/etc/wifi/softap/tiwlan_ap.ini:system/etc/wifi/softap/tiwlan_ap.ini \
-    vendor/se/arc/proprietary/etc/wifi/softap/tiwlan_firmware_ap.bin:system/etc/wifi/softap/tiwlan_firmware_ap.bin
-    
+    vendor/se/arc/proprietary/etc/wifi/softap/tiwlan_firmware_ap.bin:system/etc/wifi/softap/tiwlan_firmware_ap.bin \
+    vendor/se/arc/proprietary/lib/modules/sdio.ko:system/lib/modules/sdio.ko \
+    vendor/se/arc/proprietary/lib/modules/tiap_drv.ko:system/lib/modules/tiap_drv.ko \
+    vendor/se/arc/proprietary/lib/modules/tiwlan_drv.ko:system/lib/modules/tiwlan_drv.ko
+#    vendor/se/arc/proprietary/etc/wifi/wpa_supplicant.conf:system/etc/wifi/wpa_supplicant.conf \
+#    vendor/se/arc/proprietary/etc/wifi/softap/hostapd.conf:system/etc/wifi/softap/hostapd.conf \
 
 ## BT proprietary
 PRODUCT_COPY_FILES += \
@@ -157,29 +163,33 @@ PRODUCT_COPY_FILES += \
 
 ## Other libraries and proprietary binaries
 PRODUCT_COPY_FILES += \
+    vendor/se/arc/proprietary/lib/libaudioalsa.so:obj/lib/libaudioalsa.so \
+    vendor/se/arc/proprietary/lib/libaudioalsa.so:system/lib/libaudioalsa.so \
     vendor/se/arc/proprietary/etc/als_curve.conf:system/etc/als_curve.conf \
     vendor/se/arc/proprietary/etc/vold.fstab:system/etc/vold.fstab \
     vendor/se/arc/proprietary/etc/hw_config.sh:system/etc/hw_config.sh \
     vendor/se/arc/proprietary/etc/sensors.conf:system/etc/sensors.conf \
+    vendor/se/arc/proprietary/lib/hw/sensors.default.so:system/lib/hw/sensors.semc.so \
     vendor/se/arc/proprietary/bin/akmd8975:system/bin/akmd8975
 
-#offline charging animation
-PRODUCT_COPY_FILES += \
-    vendor/se/arc/proprietary/bin/updatemiscta:system/bin/updatemiscta \
-    vendor/se/arc/proprietary/lib/libmiscta.so:system/lib/libmiscta.so \
-    device/se/arc/prebuilt/charging_animation_01.png:system/etc/chargemon/charging_01.png \
-    device/se/arc/prebuilt/charging_animation_02.png:system/etc/chargemon/charging_02.png \
-    device/se/arc/prebuilt/charging_animation_03.png:system/etc/chargemon/charging_03.png \
-    device/se/arc/prebuilt/charging_animation_04.png:system/etc/chargemon/charging_04.png \
-    device/se/arc/prebuilt/charging_animation_05.png:system/etc/chargemon/charging_05.png \
-    device/se/arc/prebuilt/charging_animation_06.png:system/etc/chargemon/charging_06.png \
-    device/se/arc/prebuilt/charging_animation_07.png:system/etc/chargemon/charging_07.png \
-    device/se/arc/prebuilt/charging_animation_blank.png:system/etc/chargemon/charging_blank.png
-
-
-#various fixes
+#offline charging animation - temporary disabled to save space
 #PRODUCT_COPY_FILES += \
-#    device/se/arc/prebuilt/gps.conf:system/etc/gps.conf \
+#    vendor/se/arc/proprietary/bin/updatemiscta:system/bin/updatemiscta \
+#    vendor/se/arc/proprietary/lib/libmiscta.so:system/lib/libmiscta.so \
+#    device/se/arc/prebuilt/animations/charging_animation_01.png:system/etc/chargemon/charging_01.png \
+#    device/se/arc/prebuilt/animations/charging_animation_02.png:system/etc/chargemon/charging_02.png \
+#    device/se/arc/prebuilt/animations/charging_animation_03.png:system/etc/chargemon/charging_03.png \
+#    device/se/arc/prebuilt/animations/charging_animation_04.png:system/etc/chargemon/charging_04.png \
+#    device/se/arc/prebuilt/animations/charging_animation_05.png:system/etc/chargemon/charging_05.png \
+#    device/se/arc/prebuilt/animations/charging_animation_06.png:system/etc/chargemon/charging_06.png \
+#    device/se/arc/prebuilt/animations/charging_animation_07.png:system/etc/chargemon/charging_07.png \
+#    device/se/arc/prebuilt/animations/charging_animation_blank.png:system/etc/chargemon/charging_blank.png
+
+
+#Temporary GPS Fix
+PRODUCT_COPY_FILES += \
+    device/se/arc/prebuilt/gps.conf:system/etc/gps.conf \
+    vendor/se/arc/proprietary/lib/hw/gps.msm7x30.so:system/lib/hw/gps.semc.so
 
 #FreeXperia BootLogo
 PRODUCT_COPY_FILES += \
