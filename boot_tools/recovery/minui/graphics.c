@@ -168,10 +168,10 @@ void gr_color(unsigned char r, unsigned char g, unsigned char b, unsigned char a
 {
     GGLContext *gl = gr_context;
     GGLint color[4];
-    color[0] = ((b << 3) | (b >> 2);
-    color[1] = ((g << 3) | (g >> 2);
-    color[2] = ((r << 3) | (r >> 2);
-    color[3] = ((a << 3) | (a >> 2);
+    color[0] = ((b << 3) | (b >> 2));
+    color[1] = ((g << 3) | (g >> 2));
+    color[2] = ((r << 3) | (r >> 2));
+    color[3] = ((a << 3) | (a >> 2));
     gl->color4xv(gl, color);
 }
 #else
