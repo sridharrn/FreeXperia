@@ -32,6 +32,10 @@
 
 #include <hardware/lights.h>
 
+#define MANUAL 0
+#define AUTOMATIC 1
+#define MANUAL_SENSOR 2
+
 /******************************************************************************/
 
 static pthread_once_t g_init = PTHREAD_ONCE_INIT;
@@ -53,6 +57,9 @@ char const*const BLUE_LED_FILE
 
 char const*const LCD_FILE
         = "/sys/class/leds/lcd-backlight/brightness";
+
+char const*const ALS_FILE
+        = "/sys/class/leds/lcd-backlight/als/enable";
 
 char const*const RED_FREQ_FILE
         = "/sys/class/leds/red/device/grpfreq";
@@ -118,9 +125,21 @@ set_light_backlight(struct light_device_t* dev,
         struct light_state_t const* state)
 {
     int err = 0;
+    int als_mode;
     int brightness = rgb_to_brightness(state);
+    switch (state->brightnessMode){
+    case BRIGHTNESS_MODE_SENSOR:
+	als_mode=AUTOMATIC;
+	break;
+    case BRIGHTNESS_MODE_USER:
+	als_mode=MANUAL;
+    default:
+	als_mode=MANUAL_SENSOR;
+	break;
+    }
     pthread_mutex_lock(&g_lock);
     g_backlight = brightness;
+    err = write_int(ALS_FILE, als_mode);
     err = write_int(LCD_FILE, brightness);
     pthread_mutex_unlock(&g_lock);
     return err;
@@ -199,32 +218,14 @@ set_speaker_light_locked(struct light_device_t* dev,
     }
 
         if (blink) {
-//            write_int(RED_FREQ_FILE, freq);
-//            write_int(RED_PWM_FILE, pwm);
-//            if (red) {
 	        write_int(RED_LED_FILE, red);
 	        write_int(GREEN_LED_FILE, green);
 	        write_int(BLUE_LED_FILE, blue);
-//	    } else 
-//	    if (green) {
-//	        write_int(RED_LED_FILE, 0);
-//	        write_int(GREEN_LED_FILE, 1);
-//	        write_int(BLUE_LED_FILE, 0);
-//	    } else 
-//	    if (blue) {
+	    } else {
 //	        write_int(RED_LED_FILE, 0);
 //	        write_int(GREEN_LED_FILE, 0);
-//	        write_int(BLUE_LED_FILE, 1);
-	    } else {
-	        write_int(RED_LED_FILE, 0);
-	        write_int(GREEN_LED_FILE, 0);
-	        write_int(BLUE_LED_FILE, 0);
+//	        write_int(BLUE_LED_FILE, 0);
 	    }
-//        }
-//        write_int(RED_BLINK_FILE, blink);
-//    } else {
-//        write_int(AMBER_BLINK_FILE, blink);
-//    }
 
     return 0;
 }
