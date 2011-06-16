@@ -61,9 +61,9 @@ public:
                                             uint32_t format,
                                             AudioSystem::output_flags flags,
                                             int32_t  sessionId);
-        virtual void pauseSession(audio_io_handle_t output, AudioSystem::stream_type stream);
-        virtual void resumeSession(audio_io_handle_t output, AudioSystem::stream_type stream);
-        virtual void releaseSession(audio_io_handle_t output);
+//        virtual void pauseSession(audio_io_handle_t output, AudioSystem::stream_type stream);
+//        virtual void resumeSession(audio_io_handle_t output, AudioSystem::stream_type stream);
+//        virtual void releaseSession(audio_io_handle_t output);
         virtual status_t startOutput(audio_io_handle_t output,
                                      AudioSystem::stream_type stream,
                                      int session = 0);
@@ -90,6 +90,7 @@ protected:
         void setStreamMute(int stream, bool on, audio_io_handle_t output, int delayMs = 0);
         audio_io_handle_t mLPADecodeOutput;           // active output handler
         audio_io_handle_t mLPAActiveOuput;           // LPA Output Handler during inactive state
+
 
         bool    mLPAMuted;
         AudioSystem::stream_type  mLPAStreamType;

@@ -1,0 +1,6 @@
+source build/envsetup.sh
+lunch 6
+rm log_arc
+#make update-api &>log_arc
+make -j4 &>log_arc
+chmod 777 out/target/product/arc/system.img

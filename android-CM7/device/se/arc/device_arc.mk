@@ -20,9 +20,8 @@ PRODUCT_COPY_FILES += \
 PRODUCT_PACKAGES += \
     librs_jni \
     gralloc.semc \
-    gralloc.msm7x30 \
     overlay.semc \
-    overlay.msm7x30 \
+    liboverlay \
     gps.semc \
     lights.semc \
     libaudio \
@@ -30,6 +29,10 @@ PRODUCT_PACKAGES += \
     libOmxVenc \
     libOmxVdec \
     com.android.future.usb.accessory
+
+
+#    overlay.msm7x30 \
+#    gralloc.msm7x30 \
     
 # proprietary side of the device
 $(call inherit-product-if-exists, vendor/se/arc/arc-vendor.mk)
@@ -77,7 +80,7 @@ PRODUCT_COPY_FILES += \
 
 ## RIL related stuff 
 PRODUCT_COPY_FILES += \
-    device/se/arc/prebuilt/libril.so:system/lib/libril.so \
+    vendor/se/arc/proprietary/lib/libril.so:system/lib/libril.so \
     vendor/se/arc/proprietary/bin/port-bridge:system/bin/port-bridge \
     vendor/se/arc/proprietary/bin/qmuxd:system/bin/qmuxd \
     vendor/se/arc/proprietary/lib/libauth.so:system/lib/libauth.so \
@@ -99,6 +102,8 @@ PRODUCT_COPY_FILES += \
     vendor/se/arc/proprietary/lib/libril-qc-1.so:system/lib/libril-qc-1.so \
     vendor/se/arc/proprietary/lib/libwms.so:system/lib/libwms.so \
     vendor/se/arc/proprietary/lib/libwmsts.so:system/lib/libwmsts.so
+#    device/se/arc/prebuilt/libril.so:system/lib/libril.so \
+
 
 ## Camera proprietaries
 PRODUCT_COPY_FILES += \
@@ -136,10 +141,10 @@ PRODUCT_COPY_FILES += \
 
 ## WIFI TI1271
 PRODUCT_COPY_FILES += \
-    vendor/se/arc/proprietary/etc/wifi/tiwlan.ini:system/etc/wifi/tiwlan.ini \
-    vendor/se/arc/proprietary/etc/wifi/tiwlan_firmware.bin:system/etc/wifi/tiwlan_firmware.bin \
+    vendor/se/arc/proprietary/etc/tiwlan.ini:system/etc/wifi/tiwlan.ini \
+    vendor/se/arc/proprietary/etc/tiwlan_firmware.bin:system/etc/wifi/tiwlan_firmware.bin \
     vendor/se/arc/proprietary/etc/wifi/softap/tiwlan_ap.ini:system/etc/wifi/softap/tiwlan_ap.ini \
-    vendor/se/arc/proprietary/etc/wifi/softap/tiwlan_firmware_ap.bin:system/etc/wifi/softap/tiwlan_firmware_ap.bin \
+    vendor/se/arc/proprietary/etc/wifi/softap/softap_firmware.bin:system/etc/wifi/softap/tiwlan_firmware_ap.bin \
     vendor/se/arc/proprietary/lib/modules/sdio.ko:system/lib/modules/sdio.ko \
     vendor/se/arc/proprietary/lib/modules/tiap_drv.ko:system/lib/modules/tiap_drv.ko \
     vendor/se/arc/proprietary/lib/modules/tiwlan_drv.ko:system/lib/modules/tiwlan_drv.ko
@@ -172,18 +177,28 @@ PRODUCT_COPY_FILES += \
     vendor/se/arc/proprietary/lib/hw/sensors.default.so:system/lib/hw/sensors.semc.so \
     vendor/se/arc/proprietary/bin/akmd8975:system/bin/akmd8975
 
-#offline charging animation - temporary disabled to save space
+
+
+#Recovery TEST Files
 #PRODUCT_COPY_FILES += \
-#    vendor/se/arc/proprietary/bin/updatemiscta:system/bin/updatemiscta \
-#    vendor/se/arc/proprietary/lib/libmiscta.so:system/lib/libmiscta.so \
-#    device/se/arc/prebuilt/animations/charging_animation_01.png:system/etc/chargemon/charging_01.png \
-#    device/se/arc/prebuilt/animations/charging_animation_02.png:system/etc/chargemon/charging_02.png \
-#    device/se/arc/prebuilt/animations/charging_animation_03.png:system/etc/chargemon/charging_03.png \
-#    device/se/arc/prebuilt/animations/charging_animation_04.png:system/etc/chargemon/charging_04.png \
-#    device/se/arc/prebuilt/animations/charging_animation_05.png:system/etc/chargemon/charging_05.png \
-#    device/se/arc/prebuilt/animations/charging_animation_06.png:system/etc/chargemon/charging_06.png \
-#    device/se/arc/prebuilt/animations/charging_animation_07.png:system/etc/chargemon/charging_07.png \
-#    device/se/arc/prebuilt/animations/charging_animation_blank.png:system/etc/chargemon/charging_blank.png
+#    device/se/arc/prebuilt/chargemon:system/bin/chargemon \
+#    device/se/arc/prebuilt/sh:system/recovery/sh \
+#    device/se/arc/prebuilt/recovery.tar.bz2:system/recovery/recovery.tar.bz2 
+
+
+
+#offline charging animation - temporary disabled to save space
+PRODUCT_COPY_FILES += \
+    vendor/se/arc/proprietary/bin/updatemiscta:system/bin/updatemiscta \
+    vendor/se/arc/proprietary/lib/libmiscta.so:system/lib/libmiscta.so \
+    device/se/arc/prebuilt/animations/charging_animation_01.png:system/etc/chargemon/charging_01.png \
+    device/se/arc/prebuilt/animations/charging_animation_02.png:system/etc/chargemon/charging_02.png \
+    device/se/arc/prebuilt/animations/charging_animation_03.png:system/etc/chargemon/charging_03.png \
+    device/se/arc/prebuilt/animations/charging_animation_04.png:system/etc/chargemon/charging_04.png \
+    device/se/arc/prebuilt/animations/charging_animation_05.png:system/etc/chargemon/charging_05.png \
+    device/se/arc/prebuilt/animations/charging_animation_06.png:system/etc/chargemon/charging_06.png \
+    device/se/arc/prebuilt/animations/charging_animation_07.png:system/etc/chargemon/charging_07.png \
+    device/se/arc/prebuilt/animations/charging_animation_blank.png:system/etc/chargemon/charging_blank.png
 
 
 #Temporary GPS Fix
@@ -241,3 +256,7 @@ PRODUCT_PROPERTY_OVERRIDES += \
     ro.product.locale.region=US
 
 PRODUCT_BUILD_PROP_OVERRIDES += BUILD_UTC_DATE=0
+
+#FIX for apps!
+PRODUCT_PROPERTY_OVERRIDES += \
+    ro.kernel.android.checkjni=0

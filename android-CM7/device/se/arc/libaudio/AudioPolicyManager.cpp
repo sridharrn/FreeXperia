@@ -16,16 +16,13 @@
  */
 
 #define LOG_TAG "AudioPolicyManager"
-//#define LOG_NDEBUG 0
-#define LOG_NDDEBUG 0
+#define LOG_NDEBUG 0
 #include <utils/Log.h>
 #include "AudioPolicyManager.h"
 #include <media/mediarecorder.h>
 #include <fcntl.h>
 
 namespace android {
-
-
 
 // ----------------------------------------------------------------------------
 // AudioPolicyManager for msm7x30 platform
@@ -41,7 +38,7 @@ uint32_t AudioPolicyManager::getDeviceForStrategy(routing_strategy strategy, boo
 
     switch (strategy) {
     case STRATEGY_DTMF:
-        if (!isInCall()) {
+        if (mPhoneState != AudioSystem::MODE_IN_CALL) {
             // when off call, DTMF strategy follows the same rules as MEDIA strategy
             device = getDeviceForStrategy(STRATEGY_MEDIA, false);
             break;
@@ -54,7 +51,7 @@ uint32_t AudioPolicyManager::getDeviceForStrategy(routing_strategy strategy, boo
         // of priority
         switch (mForceUse[AudioSystem::FOR_COMMUNICATION]) {
         case AudioSystem::FORCE_BT_SCO:
-            if (!isInCall() || strategy != STRATEGY_DTMF) {
+            if (mPhoneState != AudioSystem::MODE_IN_CALL || strategy != STRATEGY_DTMF) {
                 device = mAvailableOutputDevices & AudioSystem::DEVICE_OUT_BLUETOOTH_SCO_CARKIT;
                 if (device) break;
             }
@@ -68,7 +65,7 @@ uint32_t AudioPolicyManager::getDeviceForStrategy(routing_strategy strategy, boo
         default:    // FORCE_NONE
 #ifdef WITH_A2DP
             // when not in a phone call, phone strategy should route STREAM_VOICE_CALL to A2DP
-            if (!isInCall()) {
+            if (mPhoneState != AudioSystem::MODE_IN_CALL) {
                 device = mAvailableOutputDevices & AudioSystem::DEVICE_OUT_BLUETOOTH_A2DP;
                 if (device) break;
                 device = mAvailableOutputDevices & AudioSystem::DEVICE_OUT_BLUETOOTH_A2DP_HEADPHONES;
@@ -86,14 +83,14 @@ uint32_t AudioPolicyManager::getDeviceForStrategy(routing_strategy strategy, boo
             break;
 
         case AudioSystem::FORCE_SPEAKER:
-            if (!isInCall() || strategy != STRATEGY_DTMF) {
+            if (mPhoneState != AudioSystem::MODE_IN_CALL || strategy != STRATEGY_DTMF) {
                 device = mAvailableOutputDevices & AudioSystem::DEVICE_OUT_BLUETOOTH_SCO_CARKIT;
                 if (device) break;
             }
 #ifdef WITH_A2DP
             // when not in a phone call, phone strategy should route STREAM_VOICE_CALL to
             // A2DP speaker when forcing to speaker output
-             if (!isInCall()) {
+            if (mPhoneState != AudioSystem::MODE_IN_CALL) {
                 device = mAvailableOutputDevices & AudioSystem::DEVICE_OUT_BLUETOOTH_A2DP_SPEAKER;
                 if (device) break;
             }
@@ -106,10 +103,6 @@ uint32_t AudioPolicyManager::getDeviceForStrategy(routing_strategy strategy, boo
         }
         if (mAvailableOutputDevices & AudioSystem::DEVICE_OUT_FM) {
             device |= AudioSystem::DEVICE_OUT_FM;
-            if (mForceUse[AudioSystem::FOR_MEDIA] == AudioSystem::FORCE_SPEAKER) {
-                device &= ~(AudioSystem::DEVICE_OUT_WIRED_HEADSET);
-                device |= AudioSystem::DEVICE_OUT_SPEAKER;
-            }
         }
     break;
 
@@ -117,7 +110,7 @@ uint32_t AudioPolicyManager::getDeviceForStrategy(routing_strategy strategy, boo
 
         // If incall, just select the STRATEGY_PHONE device: The rest of the behavior is handled by
         // handleIncallSonification().
-        if (isInCall()) {
+        if (mPhoneState == AudioSystem::MODE_IN_CALL) {
             device = getDeviceForStrategy(STRATEGY_PHONE, false);
             break;
         }
@@ -151,19 +144,17 @@ uint32_t AudioPolicyManager::getDeviceForStrategy(routing_strategy strategy, boo
                 }
             }
     #endif
+/*
             if (device2 == 0) {
                 device2 = mAvailableOutputDevices & AudioSystem::DEVICE_OUT_AUX_HDMI;
             }
+*/
             if (device2 == 0) {
                 device2 = mAvailableOutputDevices & AudioSystem::DEVICE_OUT_WIRED_HEADPHONE;
             }
 
             if (device2 == 0) {
                 device2 = mAvailableOutputDevices & AudioSystem::DEVICE_OUT_WIRED_HEADSET;
-            }
-
-            if (device2 == 0) {
-                device2 = mAvailableOutputDevices & AudioSystem::DEVICE_OUT_FM_TX;
             }
 
             if (device2 == 0) {
@@ -417,7 +408,7 @@ void AudioPolicyManager::setPhoneState(int state)
 
     // if leaving call state, handle special case of active streams
     // pertaining to sonification strategy see handleIncallSonification()
-    if (isInCall()) {
+    if (mPhoneState == AudioSystem::MODE_IN_CALL) {
         LOGV("setPhoneState() in call state management: new state is %d", state);
         for (int stream = 0; stream < AudioSystem::NUM_STREAM_TYPES; stream++) {
             AudioPolicyManagerBase::handleIncallSonification(stream, false, true);
@@ -432,19 +423,14 @@ void AudioPolicyManager::setPhoneState(int state)
     bool force = (mPhoneState == AudioSystem::MODE_IN_CALL);
 
     // are we entering or starting a call
-    if (!isStateInCall(oldState) && isStateInCall(state)) {
+    if ((oldState != AudioSystem::MODE_IN_CALL) && (state == AudioSystem::MODE_IN_CALL)) {
         LOGV("  Entering call in setPhoneState()");
         // force routing command to audio hardware when starting a call
         // even if no device change is needed
         force = true;
-    } else if (isStateInCall(oldState) && !isStateInCall(state)) {
+    } else if ((oldState == AudioSystem::MODE_IN_CALL) && (state != AudioSystem::MODE_IN_CALL)) {
         LOGV("  Exiting call in setPhoneState()");
         // force routing command to audio hardware when exiting a call
-        // even if no device change is needed
-        force = true;
-    } else if (isStateInCall(state) && (state != oldState)) {
-        LOGV("  Switching between telephony and VoIP in setPhoneState()");
-        // force routing command to audio hardware when switching between telephony and VoIP
         // even if no device change is needed
         force = true;
     }
@@ -473,8 +459,10 @@ void AudioPolicyManager::setPhoneState(int state)
 
     // force routing command to audio hardware when ending call
     // even if no device change is needed
-    if (isStateInCall(oldState) && newDevice == 0) {
-        newDevice = hwOutputDesc->device();
+    if (oldState == AudioSystem::MODE_IN_CALL) {
+        if (newDevice == 0) {
+            newDevice = hwOutputDesc->device();
+        }
         force = true;
     }
 
@@ -482,7 +470,7 @@ void AudioPolicyManager::setPhoneState(int state)
     // immediately and delay the route change to avoid sending the ring tone
     // tail into the earpiece or headset.
     int delayMs = 0;
-    if (isStateInCall(state) && oldState == AudioSystem::MODE_RINGTONE) {
+    if (state == AudioSystem::MODE_IN_CALL && oldState == AudioSystem::MODE_RINGTONE) {
         // delay the device change command by twice the output latency to have some margin
         // and be sure that audio buffers not yet affected by the mute are out when
         // we actually apply the route change
@@ -495,7 +483,7 @@ void AudioPolicyManager::setPhoneState(int state)
 
     // if entering in call state, handle special case of active streams
     // pertaining to sonification strategy see handleIncallSonification()
-    if (isStateInCall(state)) {
+    if (state == AudioSystem::MODE_IN_CALL) {
         LOGV("setPhoneState() in call state management: new state is %d", state);
         // unmute the ringing tone after a sufficient delay if it was muted before
         // setting output device above
@@ -535,19 +523,19 @@ audio_io_handle_t AudioPolicyManager::getSession(AudioSystem::stream_type stream
     outputDesc->mLatency = 0;
     outputDesc->mFlags = (AudioSystem::output_flags)(flags | AudioSystem::OUTPUT_FLAG_DIRECT);
     outputDesc->mRefCount[stream] = 0;
-    output = mpClientInterface->openSession(&outputDesc->mDevice,
-                                    &outputDesc->mFormat,
-                                    outputDesc->mFlags,
-                                    stream,
-                                    sessionId);
-
+//    output = mpClientInterface->openSession(&outputDesc->mDevice,
+//                                    &outputDesc->mFormat,
+//                                    outputDesc->mFlags,
+//                                    stream,
+//                                    sessionId);
+//
     // only accept an output with the requeted parameters
     if ((format != 0 && format != outputDesc->mFormat) || !output) {
         LOGE("openSession() failed opening a session: format %d, sessionId %d output %d",
                 format, sessionId, output);
-        if(output) {
-            mpClientInterface->closeSession(output);
-        }
+//        if(output) {
+//            mpClientInterface->closeSession(output);
+//        }
         delete outputDesc;
         return 0;
     }
@@ -557,62 +545,62 @@ audio_io_handle_t AudioPolicyManager::getSession(AudioSystem::stream_type stream
     return output;
 }
 
-void AudioPolicyManager::pauseSession(audio_io_handle_t output, AudioSystem::stream_type stream)
-{
-    LOGV("pauseSession() Output [%d] and stream is [%d]", output, stream);
+//void AudioPolicyManager::pauseSession(audio_io_handle_t output, AudioSystem::stream_type stream)
+//{
+//    LOGV("pauseSession() Output [%d] and stream is [%d]", output, stream);
+//
+//    if ( (output == mLPADecodeOutput) &&
+//         (stream == mLPAStreamType) ) {
+//
+//        mLPAActiveOuput = mLPADecodeOutput;
+//        mLPAActiveStreamType = mLPAStreamType;
+//        mLPADecodeOutput = -1;
+//        mLPAStreamType = AudioSystem::DEFAULT;
+//        mLPAMuted = false;
+//    }
+//}
 
-    if ( (output == mLPADecodeOutput) &&
-         (stream == mLPAStreamType) ) {
+//void AudioPolicyManager::resumeSession(audio_io_handle_t output, AudioSystem::stream_type stream)
+//{
+//    LOGV("resumeSession() Output [%d] and stream is [%d]", output, stream);
+//
+//    if (output == mLPAActiveOuput)
+//    {
+//        mLPADecodeOutput = mLPAActiveOuput;
+//        mLPAStreamType = stream;
+//        AudioPolicyManager::startOutput(mLPADecodeOutput, mLPAStreamType);
+//
+//        // Set Volume if the music stream volume is changed in the Pause state of LPA Jagan
+//        mLPAActiveOuput = -1;
+//        mLPAActiveStreamType = AudioSystem::DEFAULT;
+//    }
+//}
 
-        mLPAActiveOuput = mLPADecodeOutput;
-        mLPAActiveStreamType = mLPAStreamType;
-        mLPADecodeOutput = -1;
-        mLPAStreamType = AudioSystem::DEFAULT;
-        mLPAMuted = false;
-    }
-}
-
-void AudioPolicyManager::resumeSession(audio_io_handle_t output, AudioSystem::stream_type stream)
-{
-    LOGV("resumeSession() Output [%d] and stream is [%d]", output, stream);
-
-    if (output == mLPAActiveOuput)
-    {
-        mLPADecodeOutput = mLPAActiveOuput;
-        mLPAStreamType = stream;
-
-        // Set Volume if the music stream volume is changed in the Pause state of LPA Jagan
-        mLPAActiveOuput = -1;
-        mLPAActiveStreamType = AudioSystem::DEFAULT;
-        AudioPolicyManager::startOutput(mLPADecodeOutput, mLPAStreamType);
-    }
-}
-
-void AudioPolicyManager::releaseSession(audio_io_handle_t output)
-{
-    LOGV("releaseSession() %d", output);
-
-    // This means the Output is put into Pause state
-    if (output == mLPAActiveOuput && mLPADecodeOutput == -1) {
-        mLPADecodeOutput = mLPAActiveOuput;
-        mLPAStreamType = mLPAActiveStreamType;
-    }
-
-    ssize_t index = mOutputs.indexOfKey(output);
-    if (index < 0) {
-        LOGW("releaseSession() releasing unknown output %d", output);
-        return;
-    }
-
-    AudioPolicyManager::stopOutput(output, mLPAStreamType);
-    delete mOutputs.valueAt(index);
-    mOutputs.removeItem(output);
-    mLPADecodeOutput = -1;
-    mLPAActiveOuput = -1;
-    mLPAStreamType = AudioSystem::DEFAULT;
-    mLPAActiveStreamType = AudioSystem::DEFAULT;
-    mLPAMuted = false;
-}
+//void AudioPolicyManager::releaseSession(audio_io_handle_t output)
+//{
+//    LOGV("releaseSession() %d", output);
+//
+//    // This means the Output is put into Pause state
+//    if (output == mLPAActiveOuput && mLPADecodeOutput == -1) {
+//        mLPADecodeOutput = mLPAActiveOuput;
+//        mLPAStreamType = mLPAActiveStreamType;
+//    }
+//
+//    ssize_t index = mOutputs.indexOfKey(output);
+//    if (index < 0) {
+//        LOGW("releaseSession() releasing unknown output %d", output);
+//        return;
+//    }
+//
+//    AudioPolicyManager::stopOutput(output, mLPAStreamType);
+//    delete mOutputs.valueAt(index);
+//    mOutputs.removeItem(output);
+//    mLPADecodeOutput = -1;
+//    mLPAActiveOuput = -1;
+//    mLPAStreamType = AudioSystem::DEFAULT;
+//    mLPAActiveStreamType = AudioSystem::DEFAULT;
+//    mLPAMuted = false;
+//}
 
 status_t AudioPolicyManager::startOutput(audio_io_handle_t output,
                                              AudioSystem::stream_type stream,
@@ -650,7 +638,7 @@ status_t AudioPolicyManager::startOutput(audio_io_handle_t output,
     }
 
     // handle special case for sonification while in call
-    if (isInCall()) {
+    if (mPhoneState == AudioSystem::MODE_IN_CALL) {
         AudioPolicyManagerBase::handleIncallSonification(stream, true, false);
     }
 
@@ -675,7 +663,7 @@ status_t AudioPolicyManager::stopOutput(audio_io_handle_t output,
     routing_strategy strategy = AudioPolicyManagerBase::getStrategy((AudioSystem::stream_type)stream);
 
     // handle special case for sonification while in call
-    if (isInCall()) {
+    if (mPhoneState == AudioSystem::MODE_IN_CALL) {
         AudioPolicyManagerBase::handleIncallSonification(stream, false, false);
     }
 
@@ -763,8 +751,7 @@ void AudioPolicyManager::setOutputDevice(audio_io_handle_t output, uint32_t devi
     if (device == (AudioSystem::DEVICE_OUT_SPEAKER | AudioSystem::DEVICE_OUT_WIRED_HEADSET) ||
         device == (AudioSystem::DEVICE_OUT_SPEAKER | AudioSystem::DEVICE_OUT_WIRED_HEADPHONE) ||
         device == (AudioSystem::DEVICE_OUT_SPEAKER | AudioSystem::DEVICE_OUT_WIRED_HEADSET | AudioSystem::DEVICE_OUT_FM) ||
-        device == (AudioSystem::DEVICE_OUT_SPEAKER | AudioSystem::DEVICE_OUT_WIRED_HEADSET | AudioSystem::DEVICE_OUT_FM) ||
-        device == (AudioSystem::DEVICE_OUT_SPEAKER | AudioSystem::DEVICE_OUT_FM_TX)){
+        device == (AudioSystem::DEVICE_OUT_SPEAKER | AudioSystem::DEVICE_OUT_WIRED_HEADSET | AudioSystem::DEVICE_OUT_FM)){
         setStrategyMute(STRATEGY_MEDIA, true, output);
         // Mute LPA output also if it belongs to STRATEGY_MEDIA
         if((mLPADecodeOutput != -1 &&
@@ -807,8 +794,7 @@ void AudioPolicyManager::setOutputDevice(audio_io_handle_t output, uint32_t devi
     if (prevDevice == (AudioSystem::DEVICE_OUT_SPEAKER | AudioSystem::DEVICE_OUT_WIRED_HEADSET) ||
         prevDevice == (AudioSystem::DEVICE_OUT_SPEAKER | AudioSystem::DEVICE_OUT_WIRED_HEADPHONE) ||
         prevDevice == (AudioSystem::DEVICE_OUT_SPEAKER | AudioSystem::DEVICE_OUT_WIRED_HEADSET | AudioSystem::DEVICE_OUT_FM) ||
-        prevDevice == (AudioSystem::DEVICE_OUT_SPEAKER | AudioSystem::DEVICE_OUT_WIRED_HEADSET | AudioSystem::DEVICE_OUT_FM) ||
-        prevDevice == (AudioSystem::DEVICE_OUT_SPEAKER | AudioSystem::DEVICE_OUT_FM_TX)){
+        prevDevice == (AudioSystem::DEVICE_OUT_SPEAKER | AudioSystem::DEVICE_OUT_WIRED_HEADSET | AudioSystem::DEVICE_OUT_FM)){
         setStrategyMute(STRATEGY_MEDIA, false, output, delayMs);
         // Unmute LPA output also if it belongs to STRATEGY_MEDIA
         if((mLPADecodeOutput != -1 &&
@@ -842,10 +828,6 @@ status_t AudioPolicyManager::checkAndSetVolume(int stream, int index, audio_io_h
         (stream == AudioSystem::FM) || force) {
         mOutputs.valueFor(output)->mCurVolume[stream] = volume;
         LOGV("setStreamVolume() for output %d stream %d, volume %f, delay %d", output, stream, volume, delayMs);
-
-        if (stream == mLPAActiveStreamType && mLPAActiveOuput > 0 ) {
-            mOutputs.valueFor(mLPAActiveOuput)->mCurVolume[mLPAActiveStreamType] = volume;
-        }
         if (stream == AudioSystem::VOICE_CALL ||
             stream == AudioSystem::DTMF ||
             stream == AudioSystem::BLUETOOTH_SCO) {
@@ -856,16 +838,7 @@ status_t AudioPolicyManager::checkAndSetVolume(int stream, int index, audio_io_h
             if (stream == AudioSystem::VOICE_CALL) {
                 voiceVolume = (float)index/(float)mStreams[stream].mIndexMax;
             } else if (stream == AudioSystem::BLUETOOTH_SCO) {
-                String8 key ("bt_headset_vgs");
-                mpClientInterface->getParameters(output,key);
-                AudioParameter result(mpClientInterface->getParameters(0,key));
-                int value;
-                if(result.getInt(String8("isVGS"),value) == NO_ERROR){
-                   LOGD("BT-SCO Voice Volume %f",(float)index/(float)mStreams[stream].mIndexMax);
-                   voiceVolume = 1.0;
-                } else {
-                   voiceVolume = (float)index/(float)mStreams[stream].mIndexMax;
-                }
+                voiceVolume = 1.0;
             }
             if (voiceVolume >= 0 && output == mHardwareOutput) {
                 mpClientInterface->setVoiceVolume(voiceVolume, delayMs);
@@ -996,7 +969,6 @@ uint32_t AudioPolicyManager::getDeviceForInputSource(int inputSource)
     case AUDIO_SOURCE_DEFAULT:
     case AUDIO_SOURCE_MIC:
     case AUDIO_SOURCE_VOICE_RECOGNITION:
-    case AUDIO_SOURCE_VOICE_COMMUNICATION:
         if (mForceUse[AudioSystem::FOR_RECORD] == AudioSystem::FORCE_BT_SCO &&
             mAvailableInputDevices & AudioSystem::DEVICE_IN_BLUETOOTH_SCO_HEADSET) {
             device = AudioSystem::DEVICE_IN_BLUETOOTH_SCO_HEADSET;

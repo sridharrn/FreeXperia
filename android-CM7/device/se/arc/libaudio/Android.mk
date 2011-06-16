@@ -1,4 +1,4 @@
-ifeq ($(TARGET_BOOTLOADER_BOARD_NAME),mogamii)
+ifeq ($(TARGET_BOOTLOADER_BOARD_NAME),mogami)
 
 ifneq ($(BUILD_TINY_ANDROID),true)
 #ifeq ($(strip $(QC_PROP)),true)
@@ -37,7 +37,7 @@ LOCAL_SHARED_LIBRARIES += libutils
 LOCAL_SHARED_LIBRARIES += libmedia
 LOCAL_SHARED_LIBRARIES += libhardware_legacy
 LOCAL_SHARED_LIBRARIES += libaudioalsa
-LOCAL_SHARED_LIBRARIES += libaudcal
+#LOCAL_SHARED_LIBRARIES += libaudcal
 
 ifeq ($TARGET_OS)-$(TARGET_SIMULATOR),linux-true)
 LOCAL_LDLIBS += -ldl
@@ -50,7 +50,7 @@ LOCAL_SHARED_LIBRARIES += liba2dp libbinder
 endif
 
 LOCAL_C_INCLUDES += $(TARGET_OUT_HEADERS)/mm-audio/audio-alsa
-LOCAL_C_INCLUDES += $(TARGET_OUT_HEADERS)/mm-audio/audcal
+#LOCAL_C_INCLUDES += $(TARGET_OUT_HEADERS)/mm-audio/audcal
 LOCAL_SRC_FILES += AudioHardware.cpp
 LOCAL_CFLAGS += -fno-short-enums
 LOCAL_CFLAGS += -DQC_PROP
@@ -61,4 +61,4 @@ include $(BUILD_SHARED_LIBRARY)
 #endif #QC_PROP
 endif # not BUILD_TINY_ANDROID
 
-endif
+endif 
