@@ -41,9 +41,7 @@ LOCAL_C_INCLUDES += $(TARGET_OUT_INTERMEDIATES)/KERNEL_OBJ/usr/include
 LOCAL_ADDITIONAL_DEPENDENCIES += $(TARGET_OUT_INTERMEDIATES)/KERNEL_OBJ/usr
 LOCAL_C_INCLUDES += hardware/msm7k/libgralloc-qsd8k
 LOCAL_SRC_FILES := overlay.cpp
-LOCAL_MODULE := overlay.semc
+LOCAL_MODULE := overlay.default
 LOCAL_MODULE_TAGS := optional
 include $(BUILD_SHARED_LIBRARY)
-
-
 endif

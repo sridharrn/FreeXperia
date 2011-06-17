@@ -12,7 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-ifeq ($(TARGET_BOOTLOADER_BOARD_NAME),mogamii)
+ifeq ($(TARGET_BOOTLOADER_BOARD_NAME),mogami)
 
 LOCAL_PATH := $(call my-dir)
 
@@ -61,9 +61,9 @@ LOCAL_SRC_FILES :=		\
 	pmemalloc.cpp
 
 LOCAL_MODULE_TAGS := tests
-LOCAL_MODULE := libgralloc_semc_host
+LOCAL_MODULE := libgralloc_qsd8k_host
 LOCAL_CFLAGS:= -DLOG_TAG=\"gralloc-qsd8k\"
 include $(BUILD_HOST_STATIC_LIBRARY)
 endif
 
-endif
+endif 

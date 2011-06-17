@@ -289,9 +289,9 @@ int gralloc_unlock(gralloc_module_t const* module,
             pmem_addr.offset = hnd->offset;
             pmem_addr.length = hnd->size;
             err = ioctl( hnd->fd, PMEM_CLEAN_CACHES,  &pmem_addr);
-        } else if ((hnd->flags & private_handle_t::PRIV_FLAGS_USES_ASHMEM)) {
-            unsigned long addr = hnd->base + hnd->offset;
-            err = ioctl(hnd->fd, ASHMEM_CACHE_FLUSH_RANGE, NULL);
+//        } else if ((hnd->flags & private_handle_t::PRIV_FLAGS_USES_ASHMEM)) {
+//            unsigned long addr = hnd->base + hnd->offset;
+//            err = ioctl(hnd->fd, ASHMEM_CACHE_FLUSH_RANGE, NULL);
         }         
 
         LOGE_IF(err < 0, "cannot flush handle %p (offs=%x len=%x)\n",
@@ -365,22 +365,22 @@ int gralloc_perform(struct gralloc_module_t const* module,
             res = 0;
             break;
         }
-        case GRALLOC_MODULE_PERFORM_DECIDE_PUSH_BUFFER_HANDLING: {
-            int format = va_arg(args, int);
-            int width = va_arg(args, int);
-            int height = va_arg(args, int);
-            char *compositionUsed = va_arg(args, char*);
-            int hasBlitEngine = va_arg(args, int);
-            int *needConversion = va_arg(args, int*);
-            int *useBufferDirectly = va_arg(args, int*);
-            size_t *size = va_arg(args, size_t*);
-            *size = calculateBufferSize(width, height, format);
-            int conversion = 0;
-            int direct = 0;
-            res = decideBufferHandlingMechanism(format, compositionUsed, hasBlitEngine,
-                                                needConversion, useBufferDirectly);
-	    break;
-	}
+//        case GRALLOC_MODULE_PERFORM_DECIDE_PUSH_BUFFER_HANDLING: {
+//            int format = va_arg(args, int);
+//            int width = va_arg(args, int);
+//            int height = va_arg(args, int);
+//            char *compositionUsed = va_arg(args, char*);
+//            int hasBlitEngine = va_arg(args, int);
+//            int *needConversion = va_arg(args, int*);
+//            int *useBufferDirectly = va_arg(args, int*);
+//            size_t *size = va_arg(args, size_t*);
+//            *size = calculateBufferSize(width, height, format);
+//            int conversion = 0;
+//            int direct = 0;
+//            res = decideBufferHandlingMechanism(format, compositionUsed, hasBlitEngine,
+//                                                needConversion, useBufferDirectly);
+//	    break;
+//	}
 	default:
 	    break;
     }

@@ -1,6 +1,6 @@
 /*
  * Copyright (C) 2008 The Android Open Source Project
- * Copyright (c) 2010, Code Aurora Forum. All rights reserved.
+ * Copyright (c) 2010-2011, Code Aurora Forum. All rights reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -42,9 +42,7 @@
 #include <hardware/overlay.h>
 
 #define HW_OVERLAY_MAGNIFICATION_LIMIT 8
-#ifndef HW_OVERLAY_MINIFICATION_LIMIT
 #define HW_OVERLAY_MINIFICATION_LIMIT HW_OVERLAY_MAGNIFICATION_LIMIT
-#endif
 
 #define EVEN_OUT(x) if (x & 0x0001) {x--;}
 #define VG0_PIPE 0
@@ -61,28 +59,43 @@
 #define COLOR_FORMAT(x) (x & 0xFFF)
 // in the final 3D format, the MSB 2Bytes are the input format and the
 // LSB 2bytes are the output format. Shift the output byte 12 bits.
-#define FORMAT_3D_OUTPUT(x) ((x & 0xF000) >> 12)
-#define FORMAT_3D_INPUT(x) (x & 0xF0000)
-#define INPUT_MASK_3D         0xFFFF0000
-#define OUTPUT_MASK_3D        0x0000FFFF
-#define SHIFT_3D              16
+#define SHIFT_OUTPUT_3D 12
+#define FORMAT_3D_OUTPUT(x) ((x & 0xF000) >> SHIFT_OUTPUT_3D)
+#define FORMAT_3D_INPUT(x)  (x & 0xF0000)
+#define INPUT_MASK_3D  0xFFFF0000
+#define OUTPUT_MASK_3D 0x0000FFFF
+#define SHIFT_3D       16
 // The output format is the 2MSB bytes. Shift the format by 12 to reflect this
-#define HAL_3D_OUT_SIDE_BY_SIDE_HALF_MASK       ((HAL_3D_IN_SIDE_BY_SIDE_HALF_L_R|HAL_3D_IN_SIDE_BY_SIDE_HALF_R_L) >> SHIFT_3D)
-#define HAL_3D_OUT_SIDE_BY_SIDE_FULL_MASK       (HAL_3D_IN_SIDE_BY_SIDE_FULL >> SHIFT_3D)
-#define HAL_3D_OUT_TOP_BOTTOM_MASK              (HAL_3D_OUT_TOP_BOTTOM >> 12)
-#define HAL_3D_OUT_INTERLEAVE_MASK              (HAL_3D_OUT_INTERLEAVE >> 12)
+#define HAL_3D_OUT_SIDE_BY_SIDE_MASK (HAL_3D_OUT_SIDE_BY_SIDE >> SHIFT_OUTPUT_3D)
+#define HAL_3D_OUT_TOP_BOTTOM_MASK   (HAL_3D_OUT_TOP_BOTTOM   >> SHIFT_OUTPUT_3D)
+#define HAL_3D_OUT_INTERLEAVE_MASK   (HAL_3D_OUT_INTERLEAVE   >> SHIFT_OUTPUT_3D)
+#define HAL_3D_OUT_MONOSCOPIC_MASK   (HAL_3D_OUT_MONOSCOPIC   >> SHIFT_OUTPUT_3D)
+
 #define FORMAT_3D_FILE        "/sys/class/graphics/fb1/format_3d"
+#define EDID_3D_INFO_FILE     "/sys/class/graphics/fb1/3d_present"
 /* -------------------------- end 3D defines ----------------------------------------*/
 
 namespace overlay {
 
-const int max_num_buffers = 3;
-struct overlay_rect {
-    int x;
-    int y;
-    int width;
-    int height;
+enum {
+    OV_2D_VIDEO_ON_PANEL = 0,
+    OV_2D_VIDEO_ON_TV,
+    OV_3D_VIDEO_2D_PANEL,
+    OV_3D_VIDEO_2D_TV,
+    OV_3D_VIDEO_3D_PANEL,
+    OV_3D_VIDEO_3D_TV
 };
+bool isHDMIConnected();
+bool is3DTV();
+bool send3DInfoPacket(unsigned int format3D);
+unsigned int  getOverlayConfig (unsigned int format3D);
+
+int get_mdp_format(int format);
+int get_size(int format, int w, int h);
+int get_mdp_orientation(int rotation, int flip);
+
+const int max_num_buffers = 3;
+typedef struct mdp_rect overlay_rect;
 
 class OverlayControlChannel {
 
@@ -92,12 +105,13 @@ class OverlayControlChannel {
     int mFBHeight;
     int mFBbpp;
     int mFBystride;
-
+    int mFormat;
     int mFD;
     int mRotFD;
     int mSize;
     int mOrientation;
     unsigned int mFormat3D;
+    bool mUIChannel;
     mdp_overlay mOVInfo;
     msm_rotator_img_info mRotInfo;
     bool openDevices(int fbnum = -1);
@@ -111,6 +125,7 @@ public:
     ~OverlayControlChannel();
     bool startControlChannel(int w, int h, int format,
                                int fbnum, bool norot = false,
+                               bool uichannel = false,
                                unsigned int format3D = 0, int zorder = 0,
                                bool ignoreFB = false);
     bool closeControlChannel();
@@ -127,8 +142,9 @@ public:
     bool getOrientation(int& orientation) const;
     bool setSource(uint32_t w, uint32_t h, int format,
                        int orientation, bool ignoreFB);
-    bool getAspectRatioPosition(int w, int h, int format, overlay_rect *rect);
+    bool getAspectRatioPosition(int w, int h, overlay_rect *rect);
     bool getPositionS3D(int channel, int format, overlay_rect *rect);
+    bool getFormat() const { return mFormat; }
 };
 
 class OverlayDataChannel {
@@ -173,9 +189,10 @@ class Overlay {
 
     bool mChannelUP;
     bool mHDMIConnected;
-    int  mS3DFormat;
-    bool mCloseChannel;
-
+    unsigned int mS3DFormat;
+    //Actual source width and height of overlay
+    int mSrcWidth;
+    int mSrcHeight;
     OverlayControlChannel objOvCtrlChannel[2];
     OverlayDataChannel    objOvDataChannel[2];
 
@@ -206,7 +223,7 @@ public:
 
 private:
     bool startChannelHDMI(int w, int h, int format, bool norot);
-    bool startChannelS3D(int w, int h, int format, bool norot, int s3DFormat);
+    bool startChannelS3D(int w, int h, int format, bool norot);
     bool setPositionS3D(int x, int y, uint32_t w, uint32_t h);
     bool setParameterS3D(int param, int value);
     bool setChannelPosition(int x, int y, uint32_t w, uint32_t h, int channel = 0);
@@ -215,10 +232,23 @@ private:
 };
 
 struct overlay_shared_data {
-    int readyToQueue;
-    int isHDMIenabled;
-    int rotid;
-    int ovid;
+    volatile bool isControlSetup;
+    unsigned int state;
+    int rotid[2];
+    int ovid[2];
+};
+
+/* Holds user set values for width and height adjustments,
+ * to avoid overscan effect on HDTV.
+ */
+class ActionSafe {
+    static float widthRatio;
+    static float heightRatio;
+public:
+    static float getWidthRatio() { return widthRatio; }
+    static float getHeightRatio() { return heightRatio; }
+    static void setWidthRatio(float ratio) { widthRatio = ratio; }
+    static void setHeightRatio(float ratio) { heightRatio = ratio; }
 };
 };
 #endif

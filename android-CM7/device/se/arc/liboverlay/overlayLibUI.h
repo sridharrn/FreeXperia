@@ -149,28 +149,85 @@ public:
     status_t queueBuffer(buffer_handle_t buffer);
 };
 
+/*
+ * Original resolution surfaces use this class
+ */
+template <OverlayUI::fbnum_t fbnum>
+class OverlayOrigRes {
+    OverlayUI mParent;
+    int mSrcWidth;
+    int mSrcHeight;
+public:
+    status_t setSource(int w, int h, int format, int orientation) {
+        mSrcWidth = w;
+        mSrcHeight = h;
+        const bool useVGPipe = true;
+        const bool waitForVsync = true;
+        return mParent.setSource(w, h, format, orientation, useVGPipe,
+                        waitForVsync, fbnum);
+    }
+
+    status_t setPosition();
+
+    status_t closeChannel() {
+        return mParent.closeChannel();
+    }
+
+    channel_state_t isChannelUp() const {
+        return mParent.isChannelUP();
+    }
+
+    int getFBWidth() const {
+        return mParent.getFBWidth();
+    }
+
+    int getFBHeight() const {
+        return mParent.getFBHeight();
+    }
+
+    status_t queueBuffer(buffer_handle_t buffer) {
+        return mParent.queueBuffer(buffer);
+    }
+};
+
+
+/* Class to calculate final position based on Panel */
 template <OverlayUI::fbnum_t>
-class OverlayOrigRes : public OverlayUI {
-    //To-do
-
-    //Remove is_fg flag usage
-
-    //Simplify setSource API
+struct OrigResTraits {
 };
 
-template<>
-class OverlayOrigRes<OverlayUI::FB0> : public OverlayUI {
+/* Applies ActionSafe ratios to destination parameters of secondary */
+template <>
+struct OrigResTraits<OverlayUI::FB1> {
+    static void calcFinalPosition(overlay_rect& rect,
+                const int srcWidth, const int srcHeight) {
+        const int fbWidth = rect.w;
+        const int fbHeight = rect.h;
+        //Portrait mode support not necessary but implemented for testing.
+        //For landscape the feature assumes an aspect of 16:9
+        if(srcHeight > srcWidth) {
+            rect.w = rect.h * srcWidth / srcHeight;
+        }
+        rect.w *= (1.0f - overlay::ActionSafe::getWidthRatio() / 100.0f);
+        rect.h *= (1.0f - overlay::ActionSafe::getHeightRatio() / 100.0f);
+        EVEN_OUT(rect.w);
+        EVEN_OUT(rect.h);
+        rect.x = (fbWidth - rect.w) / 2;
+        rect.y = (fbHeight - rect.h) / 2;
+    }
 };
 
-template<>
-class OverlayOrigRes<OverlayUI::FB1> : public OverlayUI {
-    //To-do
-
-    //Apply action-safe calculations to the final position on screen, as per
-    //user choice. (overlay::ActionSafe)
-
-    //Apply Aspect ratio for HDMI for "native-portrait" mode devices.
-};
+/* Sets final position on display */
+template <OverlayUI::fbnum_t fbnum>
+status_t OverlayOrigRes<fbnum>::setPosition() {
+    overlay_rect rect;
+    rect.x = 0;
+    rect.y = 0;
+    rect.w = getFBWidth();
+    rect.h = getFBHeight();
+    OrigResTraits<fbnum>::calcFinalPosition(rect, mSrcWidth, mSrcHeight);
+    return mParent.setPosition(rect.x, rect.y, rect.w, rect.h);
+}
 
 };
 #endif

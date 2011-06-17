@@ -60,10 +60,6 @@
 #include <media/AudioSystem.h>
 #include <media/AudioRecord.h>
 
-//extern "C" {
-//#include <linux/spi_aic3254.h>
-//}
-
 #define LOG_SND_RPC 0  // Set to 1 to log sound RPC's
 
 #define DUALMIC_KEY "dualmic_enabled"
@@ -140,13 +136,6 @@ static uint32_t DEVICE_SPEAKER_HEADSET_RX = 13; //headset_speaker_stereo_rx
 static uint32_t DEVICE_FMRADIO_STEREO_TX = 14;
 static uint32_t DEVICE_HDMI_STERO_RX = 15; //hdmi_stereo_rx
 static uint32_t DEVICE_COUNT = DEVICE_BT_SCO_TX +1;
-
-//static bool support_aic3254 = false;
-//static int vr_mode_enabled;
-//static bool vr_mode_change = false;
-//static int vr_uses_ns = 0;
-//static int alt_enable = 0;
-//static int hac_enable = 0;
 
 int dev_cnt = 0;
 const char ** name = NULL;
@@ -477,28 +466,15 @@ free(device_list);
 AudioHardware::AudioHardware() :
     mInit(false), mMicMute(true), mBluetoothNrec(true), mBluetoothId(0),
     mOutput(0), mCurSndDevice(-1),
-//    mHACSetting(false),
-//    mBluetoothIdTx(0), mBluetoothIdRx(0),
     mTtyMode(TTY_OFF), mDualMicEnabled(false), mFmFd(-1)
 {
     int (*snd_get_num)();
     int (*snd_get_bt_endpoint)(msm_bt_endpoint *);
-//    int (*set_acoustic_parameters)();
-//    int (*set_aic3254_parameters)();
 
     struct msm_bt_endpoint *ept;
 
     int control;
     int i = 0,index = 0;
-
-//    acoustic =:: dlopen("/system/lib/libhtc_acoustic.so", RTLD_NOW);
-//    if (acoustic == NULL ) {
-//        LOGD("Could not open libhtc_acoustic.so");
-//        /* this is not really an error on non-htc devices... */
-//        mNumBTEndpoints = 0;
-//        mInit = true;
-//        return;
-//    }
 
     head = (Routing_table* ) malloc(sizeof(Routing_table));
     head->next = NULL;
@@ -585,57 +561,6 @@ AudioHardware::AudioHardware() :
         device_list[index].capability = msm_get_device_capability(device_list[index].dev_id);
         LOGV("class ID = %d,capablity = %d for device %d",device_list[index].class_id,device_list[index].capability,device_list[index].dev_id);
     }
-
-//    set_acoustic_parameters = (int (*)(void))::dlsym(acoustic, "set_acoustic_parameters");
-//    if ((*set_acoustic_parameters) == 0 ) {
-//        LOGE("Could not open set_acoustic_parameters()");
-//        return;
-//    }
-//
-//    int rc = set_acoustic_parameters();
-//    if (rc < 0) {
-//        LOGD("Could not set acoustic parameters to share memory: %d", rc);
-//    }
-//
-//    set_aic3254_parameters = (int (*)(void))::dlsym(acoustic, "set_aic3254_parameters");
-//    if ((*set_aic3254_parameters) == 0 ) {
-//        LOGE("Could not open set_aic3254_parameters()");
-//        return;
-//    }
-//
-//    rc = set_aic3254_parameters();
-//    if (rc < 0) {
-//        LOGD("Could not set aic3254 parameters to share memory: %d", rc);
-//        support_aic3254 = false;
-//    }
-
-/* Force to Original until we get better idea on the DSP profile settings */
-//    if (support_aic3254) {
-//        aic3254_config("Original");
-//    }
-//
-//    snd_get_num = (int (*)(void))::dlsym(acoustic, "snd_get_num");
-//    if ((*snd_get_num) == 0 ) {
-//        LOGD("Could not open snd_get_num()");
-//    }
-//
-//    mNumBTEndpoints = snd_get_num();
-//    LOGV("mNumBTEndpoints = %d", mNumBTEndpoints);
-//    mBTEndpoints = new msm_bt_endpoint[mNumBTEndpoints];
-//    mInit = true;
-//    LOGV("constructed %d SND endpoints)", mNumBTEndpoints);
-//    ept = mBTEndpoints;
-//    snd_get_bt_endpoint = (int (*)(msm_bt_endpoint *))::dlsym(acoustic, "snd_get_bt_endpoint");
-//    if ((*snd_get_bt_endpoint) == 0 ) {
-//        LOGE("Could not open snd_get_bt_endpoint()");
-//        return;
-//    }
-//    snd_get_bt_endpoint(mBTEndpoints);
-//
-//    for (int i = 0; i < mNumBTEndpoints; i++) {
-//        LOGV("BT name %s (tx,rx)=(%d,%d)", mBTEndpoints[i].name, mBTEndpoints[i].tx, mBTEndpoints[i].rx);
-//    }
-
     mInit = true;
 }
 
@@ -766,8 +691,6 @@ void AudioHardware::closeInputStream(AudioStreamIn* in) {
 
 status_t AudioHardware::setMode(int mode)
 {
-//    if (support_aic3254)
-//        do_aic3254_control(mode);
 
     status_t status = AudioHardwareBase::setMode(mode);
     if (status == NO_ERROR) {
@@ -1208,12 +1131,6 @@ status_t AudioHardware::doAudioRouteOrMute(uint32_t device)
         }
     }
 
-/* Force to Original until we get better idea on the DSP profile settings */
-//    if (support_aic3254) {
-//        aic3254_config("Original");
-//        do_aic3254_control(mMode);
-//    }
-
     if (device == (int) SND_DEVICE_BT) {
         if (mBluetoothIdTx != 0) {
             rx_acdb_id = mBluetoothIdRx;
@@ -1235,12 +1152,11 @@ status_t AudioHardware::doAudioRouteOrMute(uint32_t device)
             tx_acdb_id = mBTEndpoints[1].tx;
             LOGD("Update ACDB ID to default carkit setting");
         }
-//    } else if (mMode == AudioSystem::MODE_IN_CALL
-//               && hac_enable && mHACSetting &&
-//               device == (int) SND_DEVICE_HANDSET) {
-//        LOGD("Update acdb id to hac profile.");
-//        rx_acdb_id = ACDB_ID_HAC_HANDSET_SPKR;
-//        tx_acdb_id = ACDB_ID_HAC_HANDSET_MIC;
+    } else if (mMode == AudioSystem::MODE_IN_CALL
+               || device == (int) SND_DEVICE_HANDSET) {
+        LOGD("Update acdb id to hac profile.");
+        rx_acdb_id = ACDB_ID_HAC_HANDSET_SPKR;
+        tx_acdb_id = ACDB_ID_HAC_HANDSET_MIC;
     } else {
         if (!checkOutputStandby() || mMode != AudioSystem::MODE_IN_CALL)
             rx_acdb_id = getACDB(MOD_PLAY, device);
@@ -1258,7 +1174,7 @@ status_t AudioHardware::get_batt_temp(int *batt_temp)
 {
     int fd, len;
     const char *fn =
-            "/sys/devices/platform/rs30100001:00000000/power_supply/battery/batt_temp";
+            "/sys/devices/platform/semc_battery_data/power_supply/semc_battery_data/temp";
 
     char get_batt_temp[6] = { 0 };
 
@@ -1299,14 +1215,6 @@ uint32_t AudioHardware::getACDB(int mode, int device)
             case SND_DEVICE_FM_SPEAKER:
             case SND_DEVICE_SPEAKER_BACK_MIC:
                 acdb_id = ACDB_ID_SPKR_PLAYBACK;
-//                if(alt_enable) {
-//                    LOGD("Enable ALT for speaker\n");
-//                    if (get_batt_temp(&batt_temp) == NO_ERROR) {
-//                        if (batt_temp < 50)
-//                            acdb_id = ACDB_ID_ALT_SPKR_PLAYBACK;
-//                        LOGD("ALT batt temp = %d\n", batt_temp);
-//                    }
-//                }
                 break;
             case SND_DEVICE_HEADSET_AND_SPEAKER:
             case SND_DEVICE_HEADSET_AND_SPEAKER_BACK_MIC:
@@ -1326,12 +1234,7 @@ uint32_t AudioHardware::getACDB(int mode, int device)
             case SND_DEVICE_HANDSET:
             case SND_DEVICE_NO_MIC_HEADSET:
             case SND_DEVICE_SPEAKER:
-		    {
-//                if (vr_mode_enabled == 0) {
-//                    acdb_id = ACDB_ID_INT_MIC_REC;
-//                } else {
                     acdb_id = ACDB_ID_INT_MIC_VR;
-                }
                 break;
             case SND_DEVICE_SPEAKER_BACK_MIC:
             case SND_DEVICE_NO_MIC_HEADSET_BACK_MIC:
@@ -1347,103 +1250,7 @@ uint32_t AudioHardware::getACDB(int mode, int device)
     return acdb_id;
 }
 
-//status_t AudioHardware::do_aic3254_control(int mode)
-//{
-// This function must set bot RX and TX mode
 
-//    LOGD("do_aic3254_control mode: %d ", mode);
-//
-//    if (cur_rx == SND_DEVICE_SPEAKER ||
-//        cur_rx == SND_DEVICE_HEADSET ||
-//        cur_rx == SND_DEVICE_HEADSET_AND_SPEAKER ||
-//        cur_rx == SND_DEVICE_FM_SPEAKER) {
-//
-//        switch (mode) {
-//        case AudioSystem::MODE_NORMAL:
-//            mode = PLAYBACK_SPEAKER;
-//            break;
-//        case AudioSystem::MODE_RINGTONE:
-//            mode = PLAYBACK_SPEAKER;
-//            break;
-//        case AudioSystem::MODE_IN_CALL:
-//            mode = PLAYBACK_SPEAKER;
-//            break;
-//        default:
-//            return 0;
-//        }
-//
-//        aic3254_ioctl(AIC3254_CONFIG_RX, mode);
-//    }
-//    return NO_ERROR;
-//}
-
-//void AudioHardware::aic3254_config(const char* aic_effect)
-//{
-//    int (*set_sound_effect)(const char* effect);
-//
-//    LOGD("aic3254_config effect: %s ", aic_effect);
-//
-//    set_sound_effect = (int (*)(const char*))::dlsym(acoustic, "set_sound_effect");
-//    if ((*set_sound_effect) == 0 ) {
-//        LOGE("Could not open set_sound_effect()");
-//        return;
-//    }
-//
-//    int rc = set_sound_effect(aic_effect);
-//    if (rc < 0) {
-//        LOGE("Could not set sound effect Original: %d", rc);
-//    }
-//
-// TEST
-//    aic3254_set_volume(30);
-//    aic3254_ioctl(AIC3254_CONFIG_RX, 13);
-//    aic3254_ioctl(AIC3254_CONFIG_TX, 13);
-// END TEST
-//}
-
-//int AudioHardware::aic3254_ioctl(int cmd, const int argc)
-//{
-//    int rc = -1;
-//    int (*set_aic3254_ioctl)(int, const int*);
-//
-//    LOGD("aic3254_ioctl()");
-//
-//    set_aic3254_ioctl = (int (*)(int, const int*))::dlsym(acoustic, "set_aic3254_ioctl");
-//    if ((*set_aic3254_ioctl) == 0) {
-//        LOGE("Could not open set_aic3254_ioctl()");
-//        return rc;
-//    }
-//
-//    LOGD("aic3254_ioctl: try ioctl 0x%x with arg %d", cmd, argc);
-// 
-//    rc = set_aic3254_ioctl(cmd, &argc);
-//    if (rc < 0) {
-//        LOGE("aic3254_ioctl failed");
-//    }
-//
-//    return rc;
-//}
-
-//int AudioHardware::aic3254_powerdown()
-//{
-//    LOGD("aic3254_powerdown");
-//    int rc = aic3254_ioctl(AIC3254_POWERDOWN, 0);
-//    if (rc < 0)
-//        LOGE("aic3254_powerdown failed");
-//    return rc;
-//}
-
-//int AudioHardware::aic3254_set_volume(int volume)
-//{
-//    LOGD("aic3254_set_volume = %d", volume);
-//
-//    if (aic3254_ioctl(AIC3254_CONFIG_VOLUME_L, volume) < 0)
-//        LOGE("aic3254_set_volume: could not set aic3254 LEFT volume %d\n", volume);
-//    int rc = aic3254_ioctl(AIC3254_CONFIG_VOLUME_R, volume);
-//    if (rc < 0)
-//        LOGE("aic3254_set_volume: could not set aic3254 RIGHT volume %d\n", volume);
-//    return rc;
-//}
 
 status_t AudioHardware::doRouting(AudioStreamInMSM72xx *input)
 {

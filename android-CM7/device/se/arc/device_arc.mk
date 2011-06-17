@@ -139,21 +139,25 @@ PRODUCT_COPY_FILES += \
     vendor/se/arc/proprietary/etc/firmware/yamato_pfp.fw:system/etc/firmware/yamato_pfp.fw \
     vendor/se/arc/proprietary/etc/firmware/yamato_pm4.fw:system/etc/firmware/yamato_pm4.fw 
 
-## WIFI TI1271
+## WIFI & BT TI1271
 PRODUCT_COPY_FILES += \
+    vendor/se/arc/proprietary/bin/hciattach:system/bin/hciattach \
+    vendor/se/arc/proprietary/etc/init.qcom.bt.sh:system/etc/init.bt.sh \
     vendor/se/arc/proprietary/etc/tiwlan.ini:system/etc/wifi/tiwlan.ini \
+    vendor/se/arc/proprietary/etc/wifi/wpa_supplicant.conf:system/etc/wifi/wpa_supplicant.conf \
+    vendor/se/arc/proprietary/etc/wifi/softap/hostapd.conf:system/etc/wifi/softap/hostapd.conf \
     vendor/se/arc/proprietary/etc/tiwlan_firmware.bin:system/etc/wifi/tiwlan_firmware.bin \
     vendor/se/arc/proprietary/etc/wifi/softap/tiwlan_ap.ini:system/etc/wifi/softap/tiwlan_ap.ini \
     vendor/se/arc/proprietary/etc/wifi/softap/softap_firmware.bin:system/etc/wifi/softap/tiwlan_firmware_ap.bin \
-    vendor/se/arc/proprietary/lib/modules/sdio.ko:system/lib/modules/sdio.ko \
-    vendor/se/arc/proprietary/lib/modules/tiap_drv.ko:system/lib/modules/tiap_drv.ko \
-    vendor/se/arc/proprietary/lib/modules/tiwlan_drv.ko:system/lib/modules/tiwlan_drv.ko
-#    vendor/se/arc/proprietary/etc/wifi/wpa_supplicant.conf:system/etc/wifi/wpa_supplicant.conf \
-#    vendor/se/arc/proprietary/etc/wifi/softap/hostapd.conf:system/etc/wifi/softap/hostapd.conf \
+    device/se/arc/modules/sdio.ko:system/lib/modules/sdio.ko \
+    device/se/arc/modules/tiap_drv.ko:system/lib/modules/tiap_drv.ko \
+    device/se/arc/modules/tiwlan_drv.ko:system/lib/modules/tiwlan_drv.ko
+#    vendor/se/arc/proprietary/bin/nvimport:system/bin/nvimport \
+#    vendor/se/arc/proprietary/bin/nvcustomizer:system/bin/nvcustomizer \
+#    vendor/se/arc/proprietary/bin/nvimport:system/bin/nvimport \
+#    vendor/se/arc/proprietary/bin/nvcustomizer:system/bin/nvcustomizer \
+#    vendor/se/arc/proprietary/bin/tiwlan_loader:system/bin/tiwlan_loader \
 
-## BT proprietary
-PRODUCT_COPY_FILES += \
-    vendor/se/arc/proprietary/etc/init.qcom.bt.sh:system/etc/init.bt.sh 
 
 
 ## Adreno 200 files
@@ -175,6 +179,9 @@ PRODUCT_COPY_FILES += \
     vendor/se/arc/proprietary/etc/hw_config.sh:system/etc/hw_config.sh \
     vendor/se/arc/proprietary/etc/sensors.conf:system/etc/sensors.conf \
     vendor/se/arc/proprietary/lib/hw/sensors.default.so:system/lib/hw/sensors.semc.so \
+    vendor/se/arc/proprietary/bin/bq275xx_fwloader:system/bin/bq275xx_fwloader \
+    vendor/se/arc/proprietary/bin/cy8ctma300_fwloader:system/bin/cy8ctma300_fwloader \
+    vendor/se/arc/proprietary/bin/hdmid:system/bin/hdmid \
     vendor/se/arc/proprietary/bin/akmd8975:system/bin/akmd8975
 
 

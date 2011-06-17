@@ -419,15 +419,10 @@ static int postOrigResHDMI(private_module_t* m) {
 
     //Post them to secondary
     if(m->enableHDMIOutput) {
-        const bool waitForVsync = true;
         const int orientation = 0;
-        const int fbnum = OverlayUI::FB1;
-        const bool useVGPipe = true;
-        ret = m->pOrigResTV->setSource(w, h, format, orientation, useVGPipe,
-                    waitForVsync, fbnum);
+        ret = m->pOrigResTV->setSource(w, h, format, orientation);
         if(ret == NO_ERROR) {
-            m->pOrigResTV->setPosition(0, 0, m->pOrigResTV->getFBWidth(),
-                    m->pOrigResTV->getFBHeight());
+            m->pOrigResTV->setPosition();
             ret = m->pOrigResTV->queueBuffer(buffer);
         }
         if(ret != NO_ERROR)
@@ -461,11 +456,7 @@ static int fb_postOrigResBuffer(struct framebuffer_device_t* dev,
         pthread_cond_signal(&m->ts.newBufferCond);
         pthread_mutex_unlock(&m->ts.newBufferMutex);
 
-        const bool useVGPipe = true;
-        const bool waitForVsync = true;
-        const int fbnum = OverlayUI::FB0;
-        ret = m->pOrigResPanel->setSource(w, h, format, orientation, useVGPipe,
-                        waitForVsync, fbnum);
+        ret = m->pOrigResPanel->setSource(w, h, format, orientation);
         if(ret == NO_ERROR) {
             ret = m->pOrigResPanel->queueBuffer(buffer);
         }
@@ -759,8 +750,8 @@ int mapFrameBufferLocked(struct private_module_t* module)
     * stream and is written to video memory as that unmodified. This implies
     * big-endian byte order if bits_per_pixel is greater than 8.
     */
-    bool pageAlignmentRequired = true;
-    if(info.bits_per_pixel == 32) {
+
+//    if(info.bits_per_pixel == 32) {
 	/*
 	* Explicitly request RGBA_8888
 	*/
@@ -777,73 +768,46 @@ int mapFrameBufferLocked(struct private_module_t* module)
 	/* Note: the GL driver does not have a r=8 g=8 b=8 a=0 config, so if we do
 	* not use the MDP for composition (i.e. hw composition == 0), ask for
 	* RGBA instead of RGBX. */
-	if (property_get("debug.sf.hw", property, NULL) > 0 && atoi(property) == 0) {
+//	if (property_get("debug.sf.hw", property, NULL) > 0 && atoi(property) == 0)
 		module->fbFormat = HAL_PIXEL_FORMAT_RGBX_8888;
-                pageAlignmentRequired = false;
-	} else if(property_get("debug.composition.type", property, NULL) > 0 &&
-                 (strncmp(property, "mdp", 3) == 0)) {
-		module->fbFormat = HAL_PIXEL_FORMAT_RGBX_8888;
-                pageAlignmentRequired = false;
-	} else
-		module->fbFormat = HAL_PIXEL_FORMAT_RGBA_8888;
-    } else {
-	/*
-	* Explicitly request 5/6/5
-	*/
-	info.bits_per_pixel = 16;
-	info.red.offset     = 11;
-	info.red.length     = 5;
-	info.green.offset   = 5;
-	info.green.length   = 6;
-	info.blue.offset    = 0;
-	info.blue.length    = 5;
-	info.transp.offset  = 0;
-	info.transp.length  = 0;
-	module->fbFormat = HAL_PIXEL_FORMAT_RGB_565;
-	if ((property_get("debug.sf.hw", property, NULL) > 0 && atoi(property) == 0) ||
-	    (property_get("debug.composition.type", property, NULL) > 0 &&
-            (strncmp(property, "mdp", 3) == 0))) {
-            pageAlignmentRequired = false;
-        }
-    }
-
-    if (pageAlignmentRequired) {
-    // Calculate the FbSize to map.
-        int y = -1;
-        do {
-            y++;
-        } while (((finfo.line_length * (info.yres + y)) % 4096) != 0);
-        module->yres_delta = y;
-    } else
-        module->yres_delta = 0;
-
+//	else if(property_get("debug.composition.type", property, NULL) > 0 && (strncmp(property, "mdp", 3) == 0))
+//		module->fbFormat = HAL_PIXEL_FORMAT_RGBX_8888;
+//	else
+//		module->fbFormat = HAL_PIXEL_FORMAT_RGBA_8888;
+//    } else {
+//	/*
+//	* Explicitly request 5/6/5
+//	*/
+//	info.bits_per_pixel = 16;
+//	info.red.offset     = 11;
+//	info.red.length     = 5;
+//	info.green.offset   = 5;
+//	info.green.length   = 6;
+//	info.blue.offset    = 0;
+//	info.blue.length    = 5;
+//	info.transp.offset  = 0;
+//	info.transp.length  = 0;
+//	module->fbFormat = HAL_PIXEL_FORMAT_RGB_565;
+//    }
     /*
      * Request NUM_BUFFERS screens (at lest 2 for page flipping)
      */
-
-    // Calculate the number of buffers required
-    int numberOfBuffers = 0;
-    int requiredSize = info.xres * (info.bits_per_pixel/8) *
-                           (info.yres + module->yres_delta);
-    for (int num = NUM_FRAMEBUFFERS_MAX; num > 0; num--) {
-        int totalSizeRequired = num * requiredSize;
-        if (finfo.smem_len >= totalSizeRequired) {
-            numberOfBuffers = num;
-            break;
-        }
-    }
+    int numberOfBuffers = (int)(finfo.smem_len/(info.yres * info.xres * (info.bits_per_pixel/8)));
     LOGV("num supported framebuffers in kernel = %d", numberOfBuffers);
 
     if (property_get("debug.gr.numframebuffers", property, NULL) > 0) {
-        int reqNum = atoi(property);
-        if ((reqNum <= numberOfBuffers) && (reqNum >= NUM_FRAMEBUFFERS_MIN)
-             && (reqNum <= NUM_FRAMEBUFFERS_MAX)) {
-            numberOfBuffers = reqNum;
+        int num = atoi(property);
+        if ((num >= NUM_FRAMEBUFFERS_MIN) && (num <= NUM_FRAMEBUFFERS_MAX)) {
+            numberOfBuffers = num;
         }
     }
 
-    info.yres_virtual = numberOfBuffers*(info.yres + module->yres_delta);
+    if (numberOfBuffers > NUM_FRAMEBUFFERS_MAX)
+        numberOfBuffers = NUM_FRAMEBUFFERS_MAX;
+
     LOGD("We support %d buffers", numberOfBuffers);
+
+    info.yres_virtual = info.yres * numberOfBuffers;
 
     uint32_t flags = PAGE_FLIP;
     if (ioctl(fd, FBIOPUT_VSCREENINFO, &info) == -1) {
@@ -863,18 +827,6 @@ int mapFrameBufferLocked(struct private_module_t* module)
     if (ioctl(fd, FBIOGET_VSCREENINFO, &info) == -1)
         return -errno;
 
-    int refreshRate = 1000000000000000LLU /
-    (
-            uint64_t( info.upper_margin + info.lower_margin + info.yres )
-            * ( info.left_margin  + info.right_margin + info.xres )
-            * info.pixclock
-    );
-
-    if (refreshRate == 0) {
-        // bleagh, bad info from the driver
-        refreshRate = 60*1000;  // 60 Hz
-    }
-
     if (int(info.width) <= 0 || int(info.height) <= 0) {
         // the driver doesn't return that information
         // default to 160 dpi
@@ -884,7 +836,8 @@ int mapFrameBufferLocked(struct private_module_t* module)
 
     float xdpi = (info.xres * 25.4f) / info.width;
     float ydpi = (info.yres * 25.4f) / info.height;
-    float fps  = refreshRate / 1000.0f;
+    //The reserved[3] field is used to store FPS by the driver.
+    float fps  = info.reserved[3];
 
     LOGI(   "using (fd=%d)\n"
             "id           = %s\n"
@@ -1058,7 +1011,7 @@ int fb_device_open(hw_module_t const* module, const char* name,
         dev->device.post            = fb_post;
         dev->device.setUpdateRect = 0;
         dev->device.compositionComplete = fb_compositionComplete;
-        dev->device.dequeueBuffer = fb_dequeueBuffer;
+//        dev->device.dequeueBuffer = fb_dequeueBuffer;
 #if defined(HDMI_DUAL_DISPLAY)
         dev->device.orientationChanged = fb_orientationChanged;
         dev->device.videoOverlayStarted = fb_videoOverlayStarted;
@@ -1084,7 +1037,7 @@ int fb_device_open(hw_module_t const* module, const char* name,
             const_cast<float&>(dev->device.fps) = m->fps;
             const_cast<int&>(dev->device.minSwapInterval) = private_module_t::PRIV_MIN_SWAP_INTERVAL;
             const_cast<int&>(dev->device.maxSwapInterval) = private_module_t::PRIV_MAX_SWAP_INTERVAL;
-            const_cast<int&>(dev->device.numFramebuffers) = m->numBuffers;
+//            const_cast<int&>(dev->device.numFramebuffers) = m->numBuffers;
 
             if (m->finfo.reserved[0] == 0x5444 &&
                     m->finfo.reserved[1] == 0x5055) {
