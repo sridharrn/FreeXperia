@@ -7,19 +7,32 @@ PRODUCT_NAME := play
 PRODUCT_DEVICE := play
 PRODUCT_MODEL := play
 
+
+ifeq ($(TARGET_PREBUILT_KERNEL),)
+LOCAL_KERNEL := device/se/play/kernel
+else
+LOCAL_KERNEL := $(TARGET_PREBUILT_KERNEL)
+endif
+
+PRODUCT_COPY_FILES += \
+    $(LOCAL_KERNEL):kernel
+
 PRODUCT_PACKAGES += \
-    gps.msm7x30 \
-    lights.msm7x30 \
-    gralloc.msm7x30 \
-    copybit.msm7x30 \
+    librs_jni \
+    gralloc.semc \
+    overlay.semc \
+    liboverlay \
+    gps.semc \
+    lights.semc \
+    libaudio \
     libOmxCore \
+    libOmxVenc \
     libOmxVdec \
-    libOmxVidEnc \
-    libmm-omxcore \
-    LiveWallpapersPicker
+    com.android.future.usb.accessory
 
 
-#    sensors.es209ra \
+#    overlay.msm7x30 \
+#    gralloc.msm7x30 \
     
 # proprietary side of the device
 $(call inherit-product-if-exists, vendor/se/play/play-vendor.mk)
@@ -35,55 +48,38 @@ DEVICE_PACKAGE_OVERLAYS := device/se/play/overlay
 
 # These are the hardware-specific configuration files
 PRODUCT_COPY_FILES := \
-	device/se/play/prebuilt/vold.fstab:system/etc/vold.fstab \
-        device/se/play/prebuilt/media_profiles.xml:system/etc/media_profiles.xml \
-	device/se/play/prebuilt/egl.cfg:system/lib/egl/egl.cfg
+	device/se/play/media_profiles.xml:system/etc/media_profiles.xml \
+	device/se/play/prebuilt/model:system/recovery/model \
+	device/se/play/prebuilt/gps.conf:system/etc/gps.conf 
 
 # Init files
 PRODUCT_COPY_FILES += \
-	device/se/play/init.zeus.rc:root/init.zeus.rc 
+	device/se/play/init.semc.rc:root/init.semc.rc \
+	device/se/play/ueventd.mogami.rc:root/ueventd.mogami.rc 
 
 # Prebuilt kl keymaps
 PRODUCT_COPY_FILES += \
-	device/se/play/es209ra_handset.kl:system/usr/keylayout/es209ra_handset.kl \
-	device/se/play/es209ra_keypad.kl:system/usr/keylayout/es209ra_keypad.kl 
-
-# These are the hardware-specific features
-PRODUCT_COPY_FILES += \
-	frameworks/base/data/etc/handheld_core_hardware.xml:system/etc/permissions/handheld_core_hardware.xml \
-	frameworks/base/data/etc/android.hardware.camera.flash-autofocus.xml:system/etc/permissions/android.hardware.camera.flash-autofocus.xml \
-	frameworks/base/data/etc/android.hardware.camera.front.xml:system/etc/permissions/android.hardware.camera.front.xml \
-	frameworks/base/data/etc/android.hardware.telephony.gsm.xml:system/etc/permissions/android.hardware.telephony.gsm.xml \
-	frameworks/base/data/etc/android.hardware.location.gps.xml:system/etc/permissions/android.hardware.location.gps.xml \
-	frameworks/base/data/etc/android.hardware.wifi.xml:system/etc/permissions/android.hardware.wifi.xml \
-	frameworks/base/data/etc/android.hardware.sensor.proximity.xml:system/etc/permissions/android.hardware.sensor.proximity.xml \
-	frameworks/base/data/etc/android.hardware.sensor.light.xml:system/etc/permissions/android.hardware.sensor.light.xml \
-	frameworks/base/data/etc/android.hardware.sensor.gyroscope.xml:system/etc/permissions/android.hardware.sensor.gyroscope.xml \
-	frameworks/base/data/etc/android.hardware.touchscreen.multitouch.jazzhand.xml:system/etc/permissions/android.hardware.touchscreen.multitouch.jazzhand.xml \
-	frameworks/base/data/etc/android.hardware.nfc.xml:system/etc/permissions/android.hardware.nfc.xml \
-	frameworks/base/data/etc/android.software.sip.voip.xml:system/etc/permissions/android.software.sip.voip.xml \
-	packages/wallpapers/LivePicker/android.software.live_wallpaper.xml:system/etc/permissions/android.software.live_wallpaper.xml
-
-
-ifeq ($(TARGET_PREBUILT_KERNEL),)
-LOCAL_KERNEL := device/se/play/kernel
-else
-LOCAL_KERNEL := $(TARGET_PREBUILT_KERNEL)
-endif
+	vendor/se/play/proprietary/usr/keylayout/atdaemon.kl:system/usr/keylayout/atdaemon.kl \
+	vendor/se/play/proprietary/usr/keylayout/msm_pmic_pwr_key.kl:system/usr/keylayout/msm_pmic_pwr_key.kl \
+	vendor/se/play/proprietary/usr/keylayout/pm8058-keypad.kl:system/usr/keylayout/pm8058-keypad.kl \
+	vendor/se/play/proprietary/usr/keylayout/simple_remote.kl:system/usr/keylayout/simple_remote.kl
+#	vendor/se/play/proprietary/usr/keylayout/AVRCP.kl:system/usr/keylayout/AVRCP.kl \
 
 PRODUCT_COPY_FILES += \
-    $(LOCAL_KERNEL):kernel
-
-
-
-
-## OMX Video decoder 
-#PRODUCT_COPY_FILES += \
-#    device/se/play/prebuilt/libOmxVdec.so:system/lib/libOmxVdec.so
+    frameworks/base/data/etc/handheld_core_hardware.xml:system/etc/permissions/handheld_core_hardware.xml \
+    frameworks/base/data/etc/android.hardware.camera.flash-autofocus.xml:system/etc/permissions/android.hardware.camera.flash-autofocus.xml \
+    frameworks/base/data/etc/android.hardware.location.gps.xml:system/etc/permissions/android.hardware.location.gps.xml \
+    frameworks/base/data/etc/android.hardware.wifi.xml:system/etc/permissions/android.hardware.wifi.xml \
+    frameworks/base/data/etc/android.hardware.sensor.proximity.xml:system/etc/permissions/android.hardware.sensor.proximity.xml \
+    frameworks/base/data/etc/android.hardware.sensor.light.xml:system/etc/permissions/android.hardware.sensor.light.xml \
+    frameworks/base/data/etc/android.hardware.touchscreen.multitouch.distinct.xml:system/etc/permissions/android.hardware.touchscreen.multitouch.distinct.xml \
+    frameworks/base/data/etc/android.hardware.usb.accessory.xml:system/etc/permissions/android.hardware.usb.accessory.xml \
+    frameworks/base/data/etc/android.software.sip.voip.xml:system/etc/permissions/android.software.sip.voip.xml
 
 
 ## RIL related stuff 
 PRODUCT_COPY_FILES += \
+    vendor/se/play/proprietary/lib/libril.so:system/lib/libril.so \
     vendor/se/play/proprietary/bin/port-bridge:system/bin/port-bridge \
     vendor/se/play/proprietary/bin/qmuxd:system/bin/qmuxd \
     vendor/se/play/proprietary/lib/libauth.so:system/lib/libauth.so \
@@ -101,37 +97,52 @@ PRODUCT_COPY_FILES += \
     vendor/se/play/proprietary/lib/libpbmlib.so:system/lib/libpbmlib.so \
     vendor/se/play/proprietary/lib/libqmi.so:system/lib/libqmi.so \
     vendor/se/play/proprietary/lib/libqueue.so:system/lib/libqueue.so \
+    vendor/se/play/proprietary/lib/libuim.so:system/lib/libuim.so \
     vendor/se/play/proprietary/lib/libril-qc-1.so:system/lib/libril-qc-1.so \
     vendor/se/play/proprietary/lib/libwms.so:system/lib/libwms.so \
     vendor/se/play/proprietary/lib/libwmsts.so:system/lib/libwmsts.so
+#    device/se/play/prebuilt/libril.so:system/lib/libril.so \
 
 
 ## Camera proprietaries
 PRODUCT_COPY_FILES += \
-    vendor/se/play/proprietary/lib/liboemcamera.so:system/lib/liboemcamera.so \
+    device/se/play/prebuilt/libcamera.so:system/lib/libcamera.so \
+    device/se/play/prebuilt/liboemcamera.so:system/lib/liboemcamera.so \
     vendor/se/play/proprietary/lib/libmmjpeg.so:system/lib/libmmjpeg.so \
-    vendor/se/play/proprietary/lib/libmmipl.so:system/lib/libmmipl.so \
+    vendor/se/play/proprietary/lib/libmmipl.so:system/lib/libmmipl.so 
+#    device/se/play/prebuilt/libcamera.so:obj/lib/libcamera.so \
+
+## FIRMWARE
+PRODUCT_COPY_FILES += \
+    vendor/se/play/proprietary/etc/firmware/bq27520_fw-0501_filever-0105_proj-hall_golden.bqfs:system/etc/firmware/bq27520_fw-0501_filever-0105_proj-hall_golden.bqfs \
+    vendor/se/play/proprietary/etc/firmware/bq27520_fw-0501_filever-0105_proj-hall_golden.dffs:system/etc/firmware/bq27520_fw-0501_filever-0105_proj-hall_golden.dffs \
+    vendor/se/play/proprietary/etc/firmware/fm_rx_init_1273.1.bts:system/etc/firmware/fm_rx_init_1273.1.bts \
+    vendor/se/play/proprietary/etc/firmware/fm_rx_init_1273.2.bts:system/etc/firmware/fm_rx_init_1273.2.bts \
+    vendor/se/play/proprietary/etc/firmware/fm_tx_init_1273.1.bts:system/etc/firmware/fm_tx_init_1273.1.bts \
+    vendor/se/play/proprietary/etc/firmware/fm_tx_init_1273.2.bts:system/etc/firmware/fm_tx_init_1273.2.bts \
+    vendor/se/play/proprietary/etc/firmware/fmc_init_1273.1.bts:system/etc/firmware/fmc_init_1273.1.bts \
+    vendor/se/play/proprietary/etc/firmware/fmc_init_1273.2.bts:system/etc/firmware/fmc_init_1273.2.bts \
+    vendor/se/play/proprietary/etc/firmware/TIInit_7.5.20.bts:system/etc/firmware/TIInit_7.5.20.bts \
+    vendor/se/play/proprietary/etc/firmware/TIInit_7.6.15.bts:system/etc/firmware/TIInit_7.6.15.bts \
+    vendor/se/play/proprietary/etc/firmware/touch_anzu_sharp_type1.hex:system/etc/firmware/touch_anzu_sharp_type1.hex \
+    vendor/se/play/proprietary/etc/firmware/touch_anzu_sharp_type2.hex:system/etc/firmware/touch_anzu_sharp_type2.hex \
+    vendor/se/play/proprietary/etc/firmware/touch_anzu_sony_type1.hex:system/etc/firmware/touch_anzu_sony_type1.hex \
+    vendor/se/play/proprietary/etc/firmware/touch_anzu_sony_type2.hex:system/etc/firmware/touch_anzu_sony_type2.hex \
+    vendor/se/play/proprietary/etc/firmware/vidc_720p_command_control.fw:system/etc/firmware/vidc_720p_command_control.fw \
+    vendor/se/play/proprietary/etc/firmware/vidc_720p_h263_dec_mc.fw:system/etc/firmware/vidc_720p_h263_dec_mc.fw \
+    vendor/se/play/proprietary/etc/firmware/vidc_720p_h264_dec_mc.fw:system/etc/firmware/vidc_720p_h264_dec_mc.fw \
+    vendor/se/play/proprietary/etc/firmware/vidc_720p_h264_enc_mc.fw:system/etc/firmware/vidc_720p_h264_enc_mc.fw \
+    vendor/se/play/proprietary/etc/firmware/vidc_720p_mp4_dec_mc.fw:system/etc/firmware/vidc_720p_mp4_dec_mc.fw \
+    vendor/se/play/proprietary/etc/firmware/vidc_720p_mp4_enc_mc.fw:system/etc/firmware/vidc_720p_mp4_enc_mc.fw \
+    vendor/se/play/proprietary/etc/firmware/vidc_720p_vc1_dec_mc.fw:system/etc/firmware/vidc_720p_vc1_dec_mc.fw \
     vendor/se/play/proprietary/etc/firmware/yamato_pfp.fw:system/etc/firmware/yamato_pfp.fw \
-    vendor/se/play/proprietary/etc/firmware/yamato_pm4.fw:system/etc/firmware/yamato_pm4.fw \
-    vendor/se/play/proprietary/etc/firmware/camfirm.bin:system/etc/firmware/camfirm.bin 
+    vendor/se/play/proprietary/etc/firmware/yamato_pm4.fw:system/etc/firmware/yamato_pm4.fw 
 
-
-## Atheros AR6002 firmware
+## WIFI & BT (to be fixed)
 PRODUCT_COPY_FILES += \
-    device/se/play/prebuilt/ar6000.ko:system/lib/modules/ar6000.ko \
-    vendor/se/play/proprietary/bin/eeprom.AR6002:system/bin/eeprom.AR6002 \
-    vendor/se/play/proprietary/bin/wlan_mac:system/bin/wlan_mac \
-    vendor/se/play/proprietary/bin/wlan_tool:system/bin/wlan_tool \
-    vendor/se/play/proprietary/bin/bmiloader:system/bin/bmiloader \
-    vendor/se/play/proprietary/bin/eeprom.AR6002:system/bin/eeprom.AR6002 \
-    vendor/se/play/proprietary/bin/recEvent:system/bin/recEvent \
-    vendor/se/play/proprietary/bin/wmiconfig:system/bin/wmiconfig 
-    
+    vendor/se/play/proprietary/bin/hciattach:system/bin/hciattach \
 
-## BT proprietary
-PRODUCT_COPY_FILES += \
-    vendor/se/play/proprietary/bin/hci_qcomm_init:system/bin/hci_qcomm_init \
-    device/se/play/prebuilt/init.bt.sh:system/etc/init.bt.sh 
+
 
 
 ## Adreno 200 files
@@ -146,48 +157,57 @@ PRODUCT_COPY_FILES += \
 
 ## Other libraries and proprietary binaries
 PRODUCT_COPY_FILES += \
-    device/se/play/prebuilt/chargemon:system/bin/chargemon \
-    device/se/play/prebuilt/model:system/recovery/model \
-    device/se/play/prebuilt/sh:system/recovery/sh \
-    device/se/play/prebuilt/recovery.tar.bz2:system/recovery/recovery.tar.bz2 \
-    device/se/play/prebuilt/hw_config.sh:system/etc/hw_config.sh \
+    vendor/se/play/proprietary/lib/libaudioalsa.so:obj/lib/libaudioalsa.so \
+    vendor/se/play/proprietary/lib/libaudioalsa.so:system/lib/libaudioalsa.so \
+    vendor/se/play/proprietary/etc/als_curve.conf:system/etc/als_curve.conf \
+    vendor/se/play/proprietary/etc/vold.fstab:system/etc/vold.fstab \
+    vendor/se/play/proprietary/etc/hw_config.sh:system/etc/hw_config.sh \
     vendor/se/play/proprietary/etc/sensors.conf:system/etc/sensors.conf \
-    vendor/se/play/proprietary/bin/akmd2:system/bin/akmd2 \
-    vendor/se/play/proprietary/etc/DualMicControl.txt:system/etc/DualMicControl.txt 
+    vendor/se/play/proprietary/lib/hw/sensors.default.so:system/lib/hw/sensors.semc.so \
+    vendor/se/play/proprietary/bin/bq275xx_fwloader:system/bin/bq275xx_fwloader \
+    vendor/se/play/proprietary/bin/cy8ctma300_fwloader:system/bin/cy8ctma300_fwloader \
+    vendor/se/play/proprietary/bin/hdmid:system/bin/hdmid \
+    vendor/se/play/proprietary/bin/akmd8975:system/bin/akmd8975
+
+
+
+#Recovery TEST Files
+#PRODUCT_COPY_FILES += \
+#    device/se/play/prebuilt/chargemon:system/bin/chargemon \
+#    device/se/play/prebuilt/sh:system/recovery/sh \
+#    device/se/play/prebuilt/recovery.tar.bz2:system/recovery/recovery.tar.bz2 
+
+
 
 #offline charging animation
 PRODUCT_COPY_FILES += \
-    vendor/se/play/proprietary/bin/chargemon:system/bin/charger \
+    vendor/se/play/proprietary/bin/chargemon:system/bin/chargemon \
     vendor/se/play/proprietary/bin/updatemiscta:system/bin/updatemiscta \
     vendor/se/play/proprietary/lib/libmiscta.so:system/lib/libmiscta.so \
-    vendor/se/play/proprietary/etc/semc/chargemon/anim1.rle:system/etc/semc/chargemon/anim1.rle \
-    vendor/se/play/proprietary/etc/semc/chargemon/anim2.rle:system/etc/semc/chargemon/anim2.rle \
-    vendor/se/play/proprietary/etc/semc/chargemon/anim3.rle:system/etc/semc/chargemon/anim3.rle \
-    vendor/se/play/proprietary/etc/semc/chargemon/anim4.rle:system/etc/semc/chargemon/anim4.rle \
-    vendor/se/play/proprietary/etc/semc/chargemon/anim5.rle:system/etc/semc/chargemon/anim5.rle \
-    vendor/se/play/proprietary/etc/semc/chargemon/anim6.rle:system/etc/semc/chargemon/anim6.rle \
-    vendor/se/play/proprietary/etc/semc/chargemon/anim7.rle:system/etc/semc/chargemon/anim7.rle \
-    vendor/se/play/proprietary/etc/semc/chargemon/anim8.rle:system/etc/semc/chargemon/anim8.rle 
+    device/se/play/prebuilt/animations/charging_animation_01.png:system/semc/chargemon/data/charging_animation_01.png \
+    device/se/play/prebuilt/animations/charging_animation_02.png:system/semc/chargemon/data/charging_animation_02.png \
+    device/se/play/prebuilt/animations/charging_animation_03.png:system/semc/chargemon/data/charging_animation_03.png \
+    device/se/play/prebuilt/animations/charging_animation_04.png:system/semc/chargemon/data/charging_animation_04.png \
+    device/se/play/prebuilt/animations/charging_animation_05.png:system/semc/chargemon/data/charging_animation_05.png \
+    device/se/play/prebuilt/animations/charging_animation_06.png:system/semc/chargemon/data/charging_animation_06.png \
+    device/se/play/prebuilt/animations/charging_animation_07.png:system/semc/chargemon/data/charging_animation_07.png \
+    device/se/play/prebuilt/animations/charging_animation_blank.png:system/semc/chargemon/data/charging_animation_blank.png
 
-#various fixes
+
+#Temporary GPS Fix
 PRODUCT_COPY_FILES += \
     device/se/play/prebuilt/gps.conf:system/etc/gps.conf \
-    device/se/play/prebuilt/wpa_supplicant.conf:system/etc/wifi/wpa_supplicant.conf \
-    vendor/se/play/proprietary/etc/dhcpcd/dhcpcd-hooks/01-test:system/etc/dhcpcd/dhcpcd-hooks/01-test \
-    vendor/se/play/proprietary/etc/dhcpcd/dhcpcd-run-hooks:system/etc/dhcpcd/dhcpcd-run-hooks \
-    vendor/se/play/proprietary/etc/dhcpcd/dhcpcd.conf:system/etc/dhcpcd/dhcpcd.conf \
-    vendor/se/play/proprietary/lib/hw/sensors.default.so:system/lib/hw/sensors.es209ra.so
-
-
-#testing kernel
-PRODUCT_COPY_FILES += \
-    device/se/play/prebuilt/boot.img:system/kernel/boot.img \
-    device/se/play/prebuilt/miniloader:system/kernel/miniloader \
-    device/se/play/prebuilt/splboot.ko:system/kernel/splboot.ko \
+    vendor/se/play/proprietary/lib/hw/gps.msm7x30.so:system/lib/hw/gps.semc.so
 
 #FreeXperia BootLogo
 PRODUCT_COPY_FILES += \
     device/se/play/prebuilt/bootanimation.zip:system/media/bootanimation.zip 
+
+#FreeXperia LiveView
+PRODUCT_COPY_FILES += \
+    device/se/common/com.sonyericsson.extras.liveview.apk:system/app/com.sonyericsson.extras.liveview.apk \
+    device/se/common/com.sonyericsson.extras.liveware.apk:system/app/com.sonyericsson.extras.liveware.apk
+     
 
 PRODUCT_PROPERTY_OVERRIDES := \
     keyguard.no_require_sim=true \
@@ -209,7 +229,7 @@ PRODUCT_PROPERTY_OVERRIDES += \
 #MT 
 PRODUCT_PROPERTY_OVERRIDES += \
 ro.product.multi_touch_enabled=true \
-ro.product.max_num_touch=2 
+ro.product.max_num_touch=4 
 
 PRODUCT_PROPERTY_OVERRIDES += \
     ro.sf.lcd_density=240 \
@@ -233,3 +253,9 @@ PRODUCT_PROPERTY_OVERRIDES += \
     ro.compcache.default=0\
     ro.product.locale.language=en \
     ro.product.locale.region=US
+
+PRODUCT_BUILD_PROP_OVERRIDES += BUILD_UTC_DATE=0
+
+#FIX for apps!
+PRODUCT_PROPERTY_OVERRIDES += \
+    ro.kernel.android.checkjni=0

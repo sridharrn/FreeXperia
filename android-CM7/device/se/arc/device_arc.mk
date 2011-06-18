@@ -49,7 +49,6 @@ DEVICE_PACKAGE_OVERLAYS := device/se/arc/overlay
 # These are the hardware-specific configuration files
 PRODUCT_COPY_FILES := \
 	device/se/arc/media_profiles.xml:system/etc/media_profiles.xml \
-	device/se/arc/prebuilt/chargemon:system/bin/chargemon \
 	device/se/arc/prebuilt/model:system/recovery/model \
 	device/se/arc/prebuilt/gps.conf:system/etc/gps.conf 
 
@@ -194,18 +193,19 @@ PRODUCT_COPY_FILES += \
 
 
 
-#offline charging animation - temporary disabled to save space
+#offline charging animation
 PRODUCT_COPY_FILES += \
+    vendor/se/arc/proprietary/bin/chargemon:system/bin/chargemon \
     vendor/se/arc/proprietary/bin/updatemiscta:system/bin/updatemiscta \
     vendor/se/arc/proprietary/lib/libmiscta.so:system/lib/libmiscta.so \
-    device/se/arc/prebuilt/animations/charging_animation_01.png:system/etc/chargemon/charging_01.png \
-    device/se/arc/prebuilt/animations/charging_animation_02.png:system/etc/chargemon/charging_02.png \
-    device/se/arc/prebuilt/animations/charging_animation_03.png:system/etc/chargemon/charging_03.png \
-    device/se/arc/prebuilt/animations/charging_animation_04.png:system/etc/chargemon/charging_04.png \
-    device/se/arc/prebuilt/animations/charging_animation_05.png:system/etc/chargemon/charging_05.png \
-    device/se/arc/prebuilt/animations/charging_animation_06.png:system/etc/chargemon/charging_06.png \
-    device/se/arc/prebuilt/animations/charging_animation_07.png:system/etc/chargemon/charging_07.png \
-    device/se/arc/prebuilt/animations/charging_animation_blank.png:system/etc/chargemon/charging_blank.png
+    device/se/arc/prebuilt/animations/charging_animation_01.png:system/semc/chargemon/data/charging_animation_01.png \
+    device/se/arc/prebuilt/animations/charging_animation_02.png:system/semc/chargemon/data/charging_animation_02.png \
+    device/se/arc/prebuilt/animations/charging_animation_03.png:system/semc/chargemon/data/charging_animation_03.png \
+    device/se/arc/prebuilt/animations/charging_animation_04.png:system/semc/chargemon/data/charging_animation_04.png \
+    device/se/arc/prebuilt/animations/charging_animation_05.png:system/semc/chargemon/data/charging_animation_05.png \
+    device/se/arc/prebuilt/animations/charging_animation_06.png:system/semc/chargemon/data/charging_animation_06.png \
+    device/se/arc/prebuilt/animations/charging_animation_07.png:system/semc/chargemon/data/charging_animation_07.png \
+    device/se/arc/prebuilt/animations/charging_animation_blank.png:system/semc/chargemon/data/charging_animation_blank.png
 
 
 #Temporary GPS Fix
@@ -216,6 +216,12 @@ PRODUCT_COPY_FILES += \
 #FreeXperia BootLogo
 PRODUCT_COPY_FILES += \
     device/se/arc/prebuilt/bootanimation.zip:system/media/bootanimation.zip 
+
+#FreeXperia LiveView
+PRODUCT_COPY_FILES += \
+    device/se/common/com.sonyericsson.extras.liveview.apk:system/app/com.sonyericsson.extras.liveview.apk \
+    device/se/common/com.sonyericsson.extras.liveware.apk:system/app/com.sonyericsson.extras.liveware.apk
+     
 
 PRODUCT_PROPERTY_OVERRIDES := \
     keyguard.no_require_sim=true \
@@ -237,7 +243,7 @@ PRODUCT_PROPERTY_OVERRIDES += \
 #MT 
 PRODUCT_PROPERTY_OVERRIDES += \
 ro.product.multi_touch_enabled=true \
-ro.product.max_num_touch=2 
+ro.product.max_num_touch=4 
 
 PRODUCT_PROPERTY_OVERRIDES += \
     ro.sf.lcd_density=240 \
