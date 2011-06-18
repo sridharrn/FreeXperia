@@ -65,22 +65,22 @@
 #define DUALMIC_KEY "dualmic_enabled"
 #define TTY_MODE_KEY "tty_mode"
 
-/* No framework support
+#ifdef WITH_QCOM_SPEECH
 #define AMRNB_DEVICE_IN "/dev/msm_amrnb_in"
 #define EVRC_DEVICE_IN "/dev/msm_evrc_in"
 #define QCELP_DEVICE_IN "/dev/msm_qcelp_in"
-*/
+#endif
 
 #define AAC_DEVICE_IN "/dev/msm_aac_in"
 #define FM_DEVICE  "/dev/msm_fm"
 #define FM_A2DP_REC 1
 #define FM_FILE_REC 2
 
-/* No framework support
+#ifdef WITH_QCOM_SPEECH
 #define AMRNB_FRAME_SIZE 32
 #define EVRC_FRAME_SIZE 23
 #define QCELP_FRAME_SIZE 35
-*/
+#endif
 
 namespace android {
 
@@ -185,6 +185,7 @@ static uint32_t fmDevice = INVALID_DEVICE;
 
 #define DEV_ID(X) device_list[X].dev_id
 void addToTable(int decoder_id,int device_id,int device_id_tx,int stream_type,bool active) {
+    LOGD("addToTable (dec_id %d, dev_rx %d, dev_tx %d, type %d, active %d)", decoder_id, device_id, device_id_tx, stream_type, active);
     Routing_table* temp_ptr;
     Mutex::Autolock lock(mRoutingTableLock);
     temp_ptr = (Routing_table* ) malloc(sizeof(Routing_table));
@@ -789,7 +790,7 @@ status_t AudioHardware::setParameters(const String8& keyValuePairs)
         } else {
             mTtyMode = TTY_OFF;
         }
-        if(mMode != AudioSystem::MODE_IN_CALL){
+        if(mMode == AudioSystem::MODE_IN_CALL){
            return NO_ERROR;
         }
         LOGI("Changed TTY Mode=%s", value.string());
@@ -808,14 +809,14 @@ String8 AudioHardware::getParameters(const String8& keys)
         value = String8(mDualMicEnabled ? "true" : "false");
         param.add(key, value);
     }
-/* No framework support
+#ifdef WITH_QCOM_SPEECH
     key = String8("tunneled-input-formats");
     if ( param.get(key,value) == NO_ERROR ) {
         param.addInt(String8("AMR"), true );
         param.addInt(String8("QCELP"), true );
         param.addInt(String8("EVRC"), true );
     }
-*/
+#endif
     LOGV("AudioHardware::getParameters() %s", param.toString().string());
     return param.toString();
 }
@@ -838,13 +839,13 @@ static unsigned calculate_audpre_table_index(unsigned index)
 
 size_t AudioHardware::getInputBufferSize(uint32_t sampleRate, int format, int channelCount)
 {
-/* No framework support
+#ifdef WITH_QCOM_SPEECH
     if ((format != AudioSystem::PCM_16_BIT) &&
         (format != AudioSystem::AMR_NB)      &&
         (format != AudioSystem::EVRC)      &&
         (format != AudioSystem::QCELP)  &&
         (format != AudioSystem::AAC)){
-*/
+#endif
     if (format != AudioSystem::PCM_16_BIT) {
         LOGW("getInputBufferSize bad format: %d", format);
         return 0;
@@ -854,7 +855,7 @@ size_t AudioHardware::getInputBufferSize(uint32_t sampleRate, int format, int ch
         return 0;
     }
 
-/* No framework support
+#ifdef WITH_QCOM_SPEECH
     if (format == AudioSystem::AMR_NB)
        return 320*channelCount;
     if (format == AudioSystem::EVRC)
@@ -862,7 +863,7 @@ size_t AudioHardware::getInputBufferSize(uint32_t sampleRate, int format, int ch
     else if (format == AudioSystem::QCELP)
        return 350*channelCount;
     else if (format == AudioSystem::AAC)
-*/
+#endif
     if (format == AudioSystem::AAC)
        return 2048;
     else
@@ -969,6 +970,11 @@ static status_t do_route_audio_rpc(uint32_t device,
         new_tx_device = DEVICE_HEADSET_TX;
         LOGV("In HEADSET");
     }
+    else if(device == SND_DEVICE_NO_MIC_HEADSET) {
+        new_rx_device = DEVICE_HEADSET_RX;
+        new_tx_device = DEVICE_HANDSET_TX;
+        LOGV("In NO MIC HEADSET");
+    }
     else if (device == SND_DEVICE_FM_HANDSET) {
         fm_device = DEVICE_FMRADIO_HANDSET_RX;
         LOGV("In FM HANDSET");
@@ -1022,13 +1028,13 @@ static status_t do_route_audio_rpc(uint32_t device,
         LOGV("In DEVICE_SPEAKER_HEADSET_RX and DEVICE_HANDSET_TX");
     }
 
-/* No framework support
+#ifdef WITH_QCOM_SPEECH
     else if (device == SND_DEVICE_HDMI) {
         new_rx_device = DEVICE_HDMI_STERO_RX;
         new_tx_device = cur_tx;
         LOGV("In DEVICE_HDMI_STERO_RX and cur_tx");
     }
-*/
+#endif
 
     if(new_rx_device != INVALID_DEVICE)
         LOGD("new_rx = %d", DEV_ID(new_rx_device));
@@ -1115,8 +1121,8 @@ status_t AudioHardware::doAudioRouteOrMute(uint32_t device)
 #endif
 /*
     LOGV("doAudioRouteOrMute() device %x, mMode %d, mMicMute %d", device, mMode, mMicMute);
-    return do_route_audio_rpc(device,
-                              mMode != AudioSystem::MODE_IN_CALL, mMicMute);
+    return do_route_audio_rpc(device,mMode != AudioSystem::MODE_IN_CALL, 
+					mMicMute, rx_acdb_id, tx_acdb_id);
 }
 */
 
@@ -1912,11 +1918,11 @@ status_t AudioHardware::AudioStreamInMSM72xx::set(
 {
     if ((pFormat == 0) ||
         ((*pFormat != AUDIO_HW_IN_FORMAT) &&
-/* No framework support
+#ifdef WITH_QCOM_SPEECH
          (*pFormat != AudioSystem::AMR_NB) &&
          (*pFormat != AudioSystem::EVRC) &&
          (*pFormat != AudioSystem::QCELP) &&
-*/
+#endif
          (*pFormat != AudioSystem::AAC)))
     {
         *pFormat = AUDIO_HW_IN_FORMAT;
@@ -2079,7 +2085,7 @@ status_t AudioHardware::AudioStreamInMSM72xx::set(
         mSampleRate = config.sample_rate;
         mBufferSize = config.buffer_size;
     }
-/* No framework support
+#ifdef WITH_QCOM_SPEECH
     else if (*pFormat == AudioSystem::EVRC)
     {
         LOGI("Recording format: EVRC");
@@ -2289,7 +2295,7 @@ status_t AudioHardware::AudioStreamInMSM72xx::set(
             goto  Error;
           }
     }
-*/
+#endif
     else if (*pFormat == AudioSystem::AAC)
     {
         LOGI("Recording format: AAC");
@@ -2496,7 +2502,7 @@ ssize_t AudioHardware::AudioStreamInMSM72xx::read( void* buffer, ssize_t bytes)
             }
         }
     }
-/* No framework support
+#ifdef WITH_QCOM_SPEECH
     else if ((mFormat == AudioSystem::EVRC) || (mFormat == AudioSystem::QCELP) || (mFormat == AudioSystem::AMR_NB))
     {
         uint8_t readBuf[36];
@@ -2549,7 +2555,7 @@ ssize_t AudioHardware::AudioStreamInMSM72xx::read( void* buffer, ssize_t bytes)
             }
         }
     }
-*/
+#endif
     else if (mFormat == AudioSystem::AAC)
     {
         *((uint32_t*)recogPtr) = 0x51434F4D ;// ('Q','C','O', 'M') Number to identify format as AAC by higher layers
