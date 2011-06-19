@@ -49,8 +49,8 @@ DEVICE_PACKAGE_OVERLAYS := device/se/arc/overlay
 # These are the hardware-specific configuration files
 PRODUCT_COPY_FILES := \
 	device/se/arc/media_profiles.xml:system/etc/media_profiles.xml \
-	device/se/arc/prebuilt/model:system/recovery/model \
 	device/se/arc/prebuilt/gps.conf:system/etc/gps.conf 
+#	device/se/arc/prebuilt/model:system/recovery/model \
 
 # Init files
 PRODUCT_COPY_FILES += \
@@ -186,10 +186,11 @@ PRODUCT_COPY_FILES += \
 
 
 #Recovery TEST Files
-#PRODUCT_COPY_FILES += \
-#    device/se/arc/prebuilt/chargemon:system/bin/chargemon \
-#    device/se/arc/prebuilt/sh:system/recovery/sh \
-#    device/se/arc/prebuilt/recovery.tar.bz2:system/recovery/recovery.tar.bz2 
+PRODUCT_COPY_FILES += \
+    device/se/arc/recovery.fstab:system/etc/recovery.fstab \
+    device/se/arc/prebuilt/recovery:root/sbin/recovery \
+    device/se/arc/prebuilt/bootrec:root/sbin/bootrec \
+    device/se/arc/prebuilt/init.rc:root/init.rc
 
 
 

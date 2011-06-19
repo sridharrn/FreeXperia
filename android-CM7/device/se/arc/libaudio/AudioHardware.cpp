@@ -509,8 +509,9 @@ AudioHardware::AudioHardware() :
 // usb_headset_stereo_rx
 // hac_mono_rx
 
-    for(i = 0; i < dev_cnt;i++) {
-        if(strcmp((char* )name[i],"handset_rx") == 0)
+    for (i = 0; i < dev_cnt;i++) {
+        LOGV("******* name[%d] = [%s] *********", i, (char* )name[i]);
+        if (strcmp((char* )name[i],"handset_rx") == 0)
             index = DEVICE_HANDSET_RX;
         else if(strcmp((char* )name[i],"handset_tx") == 0)
             index = DEVICE_HANDSET_TX;
@@ -528,14 +529,6 @@ AudioHardware::AudioHardware() :
             index = DEVICE_FMRADIO_HEADSET_RX;
         else if(strcmp((char* )name[i],"fmradio_speaker_rx") == 0)
             index = DEVICE_FMRADIO_SPEAKER_RX;
-
-/* This should be needed ?
-        else if(strcmp((char* )name[i],"handset_dual_mic_endfire_tx") == 0)
-            index = DEVICE_DUALMIC_HANDSET_TX;
-        else if(strcmp((char* )name[i],"speaker_dual_mic_endfire_tx") == 0)
-            index = DEVICE_DUALMIC_SPEAKER_TX;
-*/
-
         else if(strcmp((char* )name[i],"tty_headset_mono_rx") == 0)
             index = DEVICE_TTY_HEADSET_MONO_RX;
         else if(strcmp((char* )name[i],"tty_headset_mono_tx") == 0)
@@ -951,7 +944,7 @@ static status_t do_route_audio_rpc(uint32_t device,
     if(device == -1)
         return 0;
 
-    int new_rx_device = INVALID_DEVICE,new_tx_device = INVALID_DEVICE,fm_device = INVALID_DEVICE;
+    uint32_t new_rx_device = INVALID_DEVICE, new_tx_device = INVALID_DEVICE;
     Routing_table* temp = NULL;
     LOGV("do_route_audio_rpc(%d, %d, %d)", device, ear_mute, mic_mute);
 
@@ -976,15 +969,18 @@ static status_t do_route_audio_rpc(uint32_t device,
         LOGV("In NO MIC HEADSET");
     }
     else if (device == SND_DEVICE_FM_HANDSET) {
-        fm_device = DEVICE_FMRADIO_HANDSET_RX;
+        new_rx_device = DEVICE_FMRADIO_HANDSET_RX;
+        new_tx_device = DEVICE_HANDSET_TX;
         LOGV("In FM HANDSET");
     }
     else if(device == SND_DEVICE_FM_SPEAKER) {
-        fm_device = DEVICE_FMRADIO_SPEAKER_RX;
+        new_rx_device = DEVICE_FMRADIO_SPEAKER_RX;
+        new_tx_device = DEVICE_HANDSET_TX;
         LOGV("In FM SPEAKER");
     }
     else if(device == SND_DEVICE_FM_HEADSET) {
-        fm_device = DEVICE_FMRADIO_HEADSET_RX;
+        new_rx_device = DEVICE_FMRADIO_HEADSET_RX;
+        new_tx_device = DEVICE_HANDSET_TX;
         LOGV("In FM HEADSET");
     }
     else if(device == SND_DEVICE_IN_S_SADC_OUT_HANDSET) {
@@ -1012,7 +1008,7 @@ static status_t do_route_audio_rpc(uint32_t device,
         new_tx_device = DEVICE_TTY_HEADSET_MONO_TX;
         LOGV("In TTY_HCO");
     }
-    else if(device == SND_DEVICE_BT) {
+    else if((device == SND_DEVICE_BT) || (device == SND_DEVICE_BT_EC_OFF)) {
         new_rx_device = DEVICE_BT_SCO_RX;
         new_tx_device = DEVICE_BT_SCO_TX;
         LOGV("In BT_HCO");
