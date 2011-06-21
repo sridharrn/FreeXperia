@@ -1,6 +1,6 @@
 # mount point	fstype    device    	[device2]	fstype2
 
-/cache      yaffs2	    /dev/block/mtdblock2
-/data       yaffs2	    /dev/block/mtdblock1
+/cache      yaffs2	    cache
+/data       yaffs2	    userdata
+/system     yaffs2	    system
 /sdcard     vfat        /dev/block/mmcblk0p1
-/system     yaffs2	    /dev/block/mtdblock0

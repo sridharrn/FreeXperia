@@ -164,9 +164,29 @@ int try_mount(const char* device, const char* mount_point, const char* fs_type, 
     return ret;
 }
 
+int is_data_media() {
+    Volume *data = volume_for_path("/data");
+    return data != NULL && strcmp(data->fs_type, "auto") == 0 && volume_for_path("/sdcard") == NULL;
+}
+
+void setup_data_media() {
+    rmdir("/sdcard");
+    mkdir("/data/media", 0755);
+    symlink("/data/media", "/sdcard");
+}
+
 int ensure_path_mounted(const char* path) {
     Volume* v = volume_for_path(path);
     if (v == NULL) {
+        // no /sdcard? let's assume /data/media
+        if (strstr(path, "/sdcard") == path && is_data_media()) {
+            LOGW("using /data/media, no /sdcard found.\n");
+            int ret;
+            if (0 != (ret = ensure_path_mounted("/data")))
+                return ret;
+            setup_data_media();
+            return 0;
+        }
         LOGE("unknown volume for path [%s]\n", path);
         return -1;
     }
@@ -200,8 +220,8 @@ int ensure_path_mounted(const char* path) {
             LOGE("failed to find \"%s\" partition to mount at \"%s\"\n",
                  v->device, v->mount_point);
             return -1;
-        }
-        return mtd_mount_partition(partition, v->mount_point, v->fs_type, 0);
+        } 
+	 return mtd_mount_partition(partition, v->mount_point, v->fs_type, 0); 
     } else if (strcmp(v->fs_type, "ext4") == 0 ||
                strcmp(v->fs_type, "ext3") == 0 ||
                strcmp(v->fs_type, "rfs") == 0 ||
@@ -227,8 +247,17 @@ int ensure_path_mounted(const char* path) {
 }
 
 int ensure_path_unmounted(const char* path) {
+    // if we are using /data/media, do not ever unmount volumes /data or /sdcard
+    if (volume_for_path("/sdcard") == NULL && (strstr(path, "/sdcard") == path || strstr(path, "/data") == path)) {
+        return 0;
+    }
+
     Volume* v = volume_for_path(path);
     if (v == NULL) {
+        // no /sdcard? let's assume /data/media
+        if (strstr(path, "/sdcard") == path && is_data_media()) {
+            return ensure_path_unmounted("/data");
+        }
         LOGE("unknown volume for path [%s]\n", path);
         return -1;
     }
@@ -257,6 +286,10 @@ int ensure_path_unmounted(const char* path) {
 int format_volume(const char* volume) {
     Volume* v = volume_for_path(volume);
     if (v == NULL) {
+        // no /sdcard? let's assume /data/media
+        if (strstr(volume, "/sdcard") == volume && is_data_media()) {
+            return format_unknown_device(NULL, volume, NULL);
+        }
         // silent failure for sd-ext
         if (strcmp(volume, "/sd-ext") == 0)
             return -1;
@@ -280,15 +313,6 @@ int format_volume(const char* volume) {
         LOGE("format_volume failed to unmount \"%s\"\n", v->mount_point);
         return -1;
     }
-    
-    //zdzihu: fake format
-    if (strcmp(volume, "/system") == 0) {
-	ensure_path_mounted(volume);
-	__system("rm -rf /system/*");
-	ensure_path_unmounted(volume);
-	return 0;
-    }    
-    //zdzihu: end
 
     if (strcmp(v->fs_type, "yaffs2") == 0 || strcmp(v->fs_type, "mtd") == 0) {
         mtd_scan_partitions();
@@ -299,6 +323,7 @@ int format_volume(const char* volume) {
         }
 
         MtdWriteContext *write = mtd_write_partition(partition);
+//        MtdWriteContext *write = mtd_write_partition(v->device);
         if (write == NULL) {
             LOGW("format_volume: can't open MTD \"%s\"\n", v->device);
             return -1;
