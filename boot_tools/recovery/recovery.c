@@ -504,12 +504,12 @@ get_menu_selection(char** headers, char** items, int menu_only,
             if (wrap_count == 3) {
                 wrap_count = 0;
                 if (ui_get_showing_back_button()) {
-                    //ui_print("Back menu button disabled.\n");
-                    //ui_set_showing_back_button(0);
+                    ui_print("Back menu button disabled.\n");
+                    ui_set_showing_back_button(0);
                 }
                 else {
-                    //ui_print("Back menu button enabled.\n");
-                    //ui_set_showing_back_button(1);
+                    ui_print("Back menu button enabled.\n");
+                    ui_set_showing_back_button(1);
                 }
             }
         }
@@ -659,11 +659,20 @@ wipe_data(int confirm) {
         }
 
         char* items[] = { " No",
+                          " No",
+                          " No",
+                          " No",
+                          " No",
+                          " No",
+                          " No",
                           " Yes -- delete all user data",   // [7]
+                          " No",
+                          " No",
+                          " No",
                           NULL };
 
         int chosen_item = get_menu_selection(title_headers, items, 1, 0);
-        if (chosen_item != 1) {
+        if (chosen_item != 7) {
             return;
         }
     }
@@ -718,9 +727,6 @@ prompt_and_wait() {
                 break;
 
             case ITEM_APPLY_SDCARD:
-		ensure_path_mounted("/system");
-		__system("/system/kernel/boot.sh");
-		/*
                 if (confirm_selection("Confirm install?", "Yes - Install /sdcard/update.zip"))
                 {
                     ui_print("\n-- Install from sdcard...\n");
@@ -733,10 +739,7 @@ prompt_and_wait() {
                     } else {
                         ui_print("\nInstall from sdcard complete.\n");
                     }
-                } */
-		ui_print("There was a problem booting custom ROM/kernel.\n");
-		ui_print("Please contact your ROM provider.\n");
-		ensure_path_unmounted("/system");
+                }
                 break;
             case ITEM_INSTALL_ZIP:
                 show_install_update_menu();
@@ -792,7 +795,7 @@ main(int argc, char **argv) {
 		return busybox_driver(argc, argv);
 	}
     __system("/sbin/postrecoveryboot.sh");
-    
+
     int is_user_initiated_recovery = 0;
     time_t start = time(NULL);
 
@@ -919,7 +922,7 @@ main(int argc, char **argv) {
         script_assert_enabled = 0;
         is_user_initiated_recovery = 1;
         ui_set_show_text(1);
-        ui_set_background(BACKGROUND_ICON_XREC);
+        ui_set_background(BACKGROUND_ICON_CLOCKWORK);
         
         if (extendedcommand_file_exists()) {
             LOGI("Running extendedcommand...\n");
