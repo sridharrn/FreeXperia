@@ -50,10 +50,6 @@ pid_t gettid() { return syscall(__NR_gettid);}
 #undef __KERNEL__
 #endif
 
-#define ASHMEM_CACHE_CLEAN_RANGE        _IO(__ASHMEMIOC, 12)
-#define GRALLOC_MODULE_PERFORM_DECIDE_PUSH_BUFFER_HANDLING 0x080000002
-
-
 /*****************************************************************************/
 
 static int gralloc_map(gralloc_module_t const* module,
@@ -81,8 +77,8 @@ static int gralloc_map(gralloc_module_t const* module,
             return -errno;
         }
         hnd->base = intptr_t(mappedAddress) + hnd->offset;
-        LOGD("gralloc_map() succeeded fd=%d, off=%d, size=%d, vaddr=%p", 
-                hnd->fd, hnd->offset, hnd->size, mappedAddress);
+        //LOGD("gralloc_map() succeeded fd=%d, off=%d, size=%d, vaddr=%p", 
+        //        hnd->fd, hnd->offset, hnd->size, mappedAddress);
     }
     *vaddr = (void*)hnd->base;
     return 0;
@@ -295,8 +291,7 @@ int gralloc_unlock(gralloc_module_t const* module,
             err = ioctl( hnd->fd, PMEM_CLEAN_CACHES,  &pmem_addr);
         } else if ((hnd->flags & private_handle_t::PRIV_FLAGS_USES_ASHMEM)) {
             unsigned long addr = hnd->base + hnd->offset;
-//            err = ioctl(hnd->fd, ASHMEM_CACHE_FLUSH_RANGE, NULL);
-            err = ioctl(hnd->fd, ASHMEM_CACHE_CLEAN_RANGE, NULL);
+            err = ioctl(hnd->fd, ASHMEM_CACHE_FLUSH_RANGE, NULL);
         }         
 
         LOGE_IF(err < 0, "cannot flush handle %p (offs=%x len=%x)\n",
