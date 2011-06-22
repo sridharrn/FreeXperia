@@ -59,6 +59,8 @@ namespace android {
 
 #define MOD_PLAY 1
 #define MOD_REC  2
+#define MOD_TX 3
+#define MOD_RX 4
 
 #define ACDB_ID_HAC_HANDSET_MIC 107
 #define ACDB_ID_HAC_HANDSET_SPKR 207
@@ -231,6 +233,9 @@ enum tty_modes {
 #define AUDIO_HW_IN_CHANNELS (AudioSystem::CHANNEL_IN_MONO) // Default audio input channel mask
 #define AUDIO_HW_IN_BUFFERSIZE 2048                 // Default audio input buffer size
 #define AUDIO_HW_IN_FORMAT (AudioSystem::PCM_16_BIT)  // Default audio input sample format
+
+#define VOICE_VOLUME_MAX 100
+
 /* ======================== 12.2 kbps mode ========================== */
 const unsigned short amrsup_bit_order_122_a[AMR_CLASS_A_BITS_122] = {
      0,   1,   2,   3,   4,   5,   6,   7,   8,   9,
@@ -333,7 +338,7 @@ public:
     virtual    void        closeInputStream(AudioStreamIn* in);
 
     virtual size_t getInputBufferSize(uint32_t sampleRate, int format, int channelCount);
-               void        clearCurDevice() { mCurSndDevice = -1; }
+               void        clearCurDevice() { mCurSndDevice = 65535; }
 
 protected:
     virtual status_t    dump(int fd, const Vector<String16>& args);
@@ -472,25 +477,25 @@ private:
 
             static const uint32_t inputSamplingRates[];
             bool        mRecordState;
+            bool        mInit;
+            bool        mMicMute;
+            bool        mBluetoothNrec;
+            uint32_t    mBluetoothId;
             bool        mHACSetting;
             uint32_t    mBluetoothIdTx;
             uint32_t    mBluetoothIdRx;
-            bool        mInit;
-            bool        mMicMute;
-            int         mFmFd;
-            bool        mBluetoothNrec;
-            uint32_t    mBluetoothId;
             AudioStreamOutMSM72xx*  mOutput;
             SortedVector <AudioStreamInMSM72xx*>   mInputs;
 
-            int mCurSndDevice;
-            int mNoiseSuppressionState;
-            int m7xsnddriverfd;
-            bool    mDualMicEnabled;
-            int     mTtyMode;
-
             msm_bt_endpoint *mBTEndpoints;
-            int mNumBTEndpoints;
+            int         mNumBTEndpoints;
+            uint32_t    mCurSndDevice;
+            uint32_t    mVoiceVolume;
+            int         mTtyMode;
+            int         mNoiseSuppressionState;
+            int         m7xsnddriverfd;
+            bool        mDualMicEnabled;
+            int         mFmFd;
 
      friend class AudioStreamInMSM72xx;
             Mutex       mLock;

@@ -7,21 +7,12 @@ if [ -s /dev/keycheck ]
 then
 # remount rootfs rw
 mount -o remount,rw rootfs /
-mount /sdcard
+#mount -t yaffs2 /dev/block/mtdblock2 /cache
+#sleep 1
+#sync
 /sbin/recovery &
 /sbin/adbd recovery 
 fi
 
 #continue booting
-
-#remount rootfs rw
-mount -o remount,rw rootfs /
-
-export EXTERNAL_STORAGE /mnt/sdcard
-export EXTERNAL_STORAGE /sdcard
-mkdir /mnt/sdcard 0000 system system
-ln -s /mnt/sdcard /sdcard
-
-#remount rootfs ro
-mount -o remount,ro rootfs /
 
