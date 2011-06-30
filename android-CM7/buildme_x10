@@ -1,5 +1,5 @@
 source build/envsetup.sh
-lunch 70
+lunch 8
 rm log_x10
 #make update-api &>log_x10
 make -j4 &>log_x10
@@ -235,4 +235,3 @@ cd ..
 chmod 777 update.zip
 ls
 chmod 777 system.img
-#java -classpath testsign.jar testsign update.zip

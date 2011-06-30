@@ -12,6 +12,7 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License
 #
+
 ifeq ($(TARGET_BOOTLOADER_BOARD_NAME),mogami)
 
 LOCAL_PATH := $(call my-dir)
@@ -20,14 +21,14 @@ include $(CLEAR_VARS)
 LOCAL_PRELINK_MODULE := false
 LOCAL_MODULE_PATH := $(TARGET_OUT_SHARED_LIBRARIES)
 LOCAL_SHARED_LIBRARIES := liblog libcutils
-LOCAL_C_INCLUDES += device/se/arc/libgralloc
-LOCAL_SRC_FILES := \
-    overlayLib.cpp \
-    overlayLibUI.cpp \
-LOCAL_CFLAGS:= -DLOG_TAG=\"OverlayLib\"
+LOCAL_C_INCLUDES += $(LOCAL_PATH)/../libgralloc
+LOCAL_SRC_FILES := overlayLib.cpp
 LOCAL_MODULE := liboverlay
-LOCAL_CFLAGS := -DCONFIG_MSM_MDP40
 LOCAL_MODULE_TAGS := optional
+LOCAL_CFLAGS += -DCONFIG_MSM_MDP40
+ifneq ($(BOARD_OVERLAY_MINIFICATION_LIMIT),)
+    LOCAL_CFLAGS += -DHW_OVERLAY_MINIFICATION_LIMIT=$(BOARD_OVERLAY_MINIFICATION_LIMIT)
+endif
 include $(BUILD_SHARED_LIBRARY)
 
 # HAL module implemenation, not prelinked and stored in
@@ -36,10 +37,11 @@ include $(CLEAR_VARS)
 LOCAL_PRELINK_MODULE := false
 LOCAL_MODULE_PATH := $(TARGET_OUT_SHARED_LIBRARIES)/hw
 LOCAL_SHARED_LIBRARIES := liblog liboverlay libcutils
-LOCAL_C_INCLUDES += device/se/arc/libgralloc
+LOCAL_C_INCLUDES += $(LOCAL_PATH)/../libgralloc
 LOCAL_SRC_FILES := overlay.cpp
 LOCAL_MODULE := overlay.semc
-LOCAL_CFLAGS := -DCONFIG_MSM_MDP40
 LOCAL_MODULE_TAGS := optional
+LOCAL_CFLAGS += -DCONFIG_MSM_MDP40
 include $(BUILD_SHARED_LIBRARY)
+
 endif

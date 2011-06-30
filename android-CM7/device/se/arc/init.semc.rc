@@ -187,9 +187,9 @@ service hdmid /system/bin/hdmid
 service touchd /system/bin/touchd
     user root
 
-on early-boot
-    # Start touch firmware loader
-    exec /system/bin/cy8ctma300_fwloader -dev /sys/devices/platform/spi_qsd.0/spi0.0 -no_condition
+#on early-boot
+#    # Start touch firmware loader
+#    exec /system/bin/cy8ctma300_fwloader -dev /sys/devices/platform/spi_qsd.0/spi0.0 -no_condition
 
 on boot
     chown system system /sys/kernel/hdmi_sii_kset/hdmi_sii_kobj/hdmi_sii_state_obj

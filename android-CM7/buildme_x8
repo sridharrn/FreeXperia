@@ -1,5 +1,5 @@
 source build/envsetup.sh
-lunch 72
+lunch 94
 rm log_x8
 #make update-api &>log_x8
 make -j4 &>log_x8
@@ -63,6 +63,7 @@ rm update/system/xbin/basename
 rm update/system/xbin/bbconfig
 rm update/system/xbin/brctl
 rm update/system/xbin/bunzip2
+
 rm update/system/xbin/bzcat
 rm update/system/xbin/bzip2
 rm update/system/xbin/cal
@@ -223,14 +224,12 @@ rm update/system/xbin/yes
 rm update/system/xbin/zcat
 rm update/system/xbin/[
 rm update/system/xbin/[[
-
-rm update/system/lib/hw/*.default.so
-rm update/system/lib/hw/*.goldfish.so
-
+#mv update/system/xbin/busybox update/system/bin/busybox
+#mv update/system/bin/wlan_cu update/system/bin/tiwlan_cu
+#mv update/system/bin/wlan_loader update/system/bin/tiwlan_loader
 cd update/
 zip -r ../update.zip *
 cd ..
 chmod 777 update.zip
 ls
 chmod 777 system.img
-#java -classpath testsign.jar testsign update.zip

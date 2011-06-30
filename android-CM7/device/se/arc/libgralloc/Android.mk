@@ -14,6 +14,7 @@
 
 ifeq ($(TARGET_BOOTLOADER_BOARD_NAME),mogami)
 
+
 LOCAL_PATH := $(call my-dir)
 
 # HAL module implemenation, not prelinked and stored in
@@ -25,43 +26,20 @@ LOCAL_SHARED_LIBRARIES := liblog libcutils libGLESv1_CM
 
 LOCAL_SRC_FILES := 	\
 	allocator.cpp 	\
+	gralloc.cpp 	\
 	framebuffer.cpp \
-	gpu.cpp			\
-	gralloc.cpp		\
-	mapper.cpp		\
-	pmemalloc.cpp
+	mapper.cpp
 	
 LOCAL_MODULE := gralloc.semc
 LOCAL_MODULE_TAGS := optional
-LOCAL_CFLAGS:= -DLOG_TAG=\"$(TARGET_BOARD_PLATFORM).gralloc\" -DHOST
+LOCAL_CFLAGS:= -DLOG_TAG=\"$(TARGET_BOARD_PLATFORM).gralloc\"
 
-#ifneq (, $(filter msm7625_ffa msm7625_surf msm7627_ffa msm7627_surf msm7627_7x_ffa msm7627_7x_surf msm7627a, $(QCOM_TARGET_PRODUCT)))
-#LOCAL_CFLAGS += -DTARGET_MSM7x27
-#endif
-
-ifeq ($(TARGET_HAVE_HDMI_OUT),true)
+ifeq ($(HDMI_DUAL_DISPLAY),true)
 LOCAL_CFLAGS += -DHDMI_DUAL_DISPLAY
-LOCAL_C_INCLUDES += $(LOCAL_PATH)/../liboverlay
+LOCAL_C_INCLUDES := $(LOCAL_PATH)/../liboverlay
 LOCAL_SHARED_LIBRARIES += liboverlay
 endif
 
-ifeq ($(TARGET_GRALLOC_USES_ASHMEM),true)
-LOCAL_CFLAGS += -DUSE_ASHMEM
-endif
 include $(BUILD_SHARED_LIBRARY)
 
-
-# Build a host library for testing
-ifeq ($(HOST_OS),linux)
-include $(CLEAR_VARS)
-LOCAL_SRC_FILES :=		\
-    gpu.cpp				\
-	pmemalloc.cpp
-
-LOCAL_MODULE_TAGS := tests
-LOCAL_MODULE := libgralloc_qsd8k_host
-LOCAL_CFLAGS:= -DLOG_TAG=\"gralloc-qsd8k\"
-include $(BUILD_HOST_STATIC_LIBRARY)
 endif
-
-endif 

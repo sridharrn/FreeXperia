@@ -4,3 +4,4 @@
 /data       yaffs2	    userdata
 /system     yaffs2	    system
 /sdcard     vfat        /dev/block/mmcblk0p1
+

@@ -30,16 +30,12 @@ PRODUCT_PACKAGES += \
     libOmxVdec \
     com.android.future.usb.accessory
 
-
-#    overlay.msm7x30 \
-#    gralloc.msm7x30 \
-    
 # proprietary side of the device
 $(call inherit-product-if-exists, vendor/se/arc/arc-vendor.mk)
 
 DISABLE_DEXPREOPT := false
 
-#PRODUCT_SPECIFIC_DEFINES += TARGET_PRELINKER_MAP=$(TOP)/device/se/arc/prelink-linux-arm-arc.map
+PRODUCT_SPECIFIC_DEFINES += TARGET_PRELINKER_MAP=$(TOP)/device/se/common/prelink-linux-arm-2G.map
 
 # These is the hardware-specific overlay, which points to the location
 # of hardware-specific resource overrides, typically the frameworks and
@@ -48,9 +44,8 @@ DEVICE_PACKAGE_OVERLAYS := device/se/arc/overlay
 
 # These are the hardware-specific configuration files
 PRODUCT_COPY_FILES := \
-	device/se/arc/media_profiles.xml:system/etc/media_profiles.xml \
+	device/se/arc/prebuilt/media_profiles.xml:system/etc/media_profiles.xml \
 	device/se/arc/prebuilt/gps.conf:system/etc/gps.conf 
-#	device/se/arc/prebuilt/model:system/recovery/model \
 
 # Init files
 PRODUCT_COPY_FILES += \
@@ -59,11 +54,14 @@ PRODUCT_COPY_FILES += \
 
 # Prebuilt kl keymaps
 PRODUCT_COPY_FILES += \
+	vendor/se/arc/proprietary/usr/keychars/qwerty.kcm.bin:system/usr/keychars/qwerty.kcm.bin \
+	vendor/se/arc/proprietary/usr/keychars/qwerty2.kcm.bin:system/usr/keychars/qwerty2.kcm.bin \
 	vendor/se/arc/proprietary/usr/keylayout/atdaemon.kl:system/usr/keylayout/atdaemon.kl \
+	vendor/se/arc/proprietary/usr/keylayout/AVRCP.kl:system/usr/keylayout/AVRCP.kl \
 	vendor/se/arc/proprietary/usr/keylayout/msm_pmic_pwr_key.kl:system/usr/keylayout/msm_pmic_pwr_key.kl \
 	vendor/se/arc/proprietary/usr/keylayout/pm8058-keypad.kl:system/usr/keylayout/pm8058-keypad.kl \
-	vendor/se/arc/proprietary/usr/keylayout/simple_remote.kl:system/usr/keylayout/simple_remote.kl
-#	vendor/se/arc/proprietary/usr/keylayout/AVRCP.kl:system/usr/keylayout/AVRCP.kl \
+	vendor/se/arc/proprietary/usr/keylayout/qwerty.kl:system/usr/keylayout/qwerty.kl \
+	vendor/se/arc/proprietary/usr/keylayout/simple_remote.kl:system/usr/keylayout/simple_remote.kl\
 
 PRODUCT_COPY_FILES += \
     frameworks/base/data/etc/handheld_core_hardware.xml:system/etc/permissions/handheld_core_hardware.xml \
@@ -101,16 +99,16 @@ PRODUCT_COPY_FILES += \
     vendor/se/arc/proprietary/lib/libril-qc-1.so:system/lib/libril-qc-1.so \
     vendor/se/arc/proprietary/lib/libwms.so:system/lib/libwms.so \
     vendor/se/arc/proprietary/lib/libwmsts.so:system/lib/libwmsts.so
-#    device/se/arc/prebuilt/libril.so:system/lib/libril.so \
 
 
 ## Camera proprietaries
-PRODUCT_COPY_FILES += \
-    device/se/arc/prebuilt/libcamera.so:system/lib/libcamera.so \
-    device/se/arc/prebuilt/liboemcamera.so:system/lib/liboemcamera.so \
-    vendor/se/arc/proprietary/lib/libmmjpeg.so:system/lib/libmmjpeg.so \
-    vendor/se/arc/proprietary/lib/libmmipl.so:system/lib/libmmipl.so 
+#PRODUCT_COPY_FILES += \
+#    device/se/arc/prebuilt/liboemcamera.so:system/lib/liboemcamera.so \
+#    vendor/se/arc/proprietary/lib/libmmjpeg.so:system/lib/libmmjpeg.so \
+#    vendor/se/arc/proprietary/lib/libmmipl.so:system/lib/libmmipl.so 
+
 #    device/se/arc/prebuilt/libcamera.so:obj/lib/libcamera.so \
+#    device/se/arc/prebuilt/libcamera.so:system/lib/libcamera.so \
 
 ## FIRMWARE
 PRODUCT_COPY_FILES += \
@@ -124,10 +122,6 @@ PRODUCT_COPY_FILES += \
     vendor/se/arc/proprietary/etc/firmware/fmc_init_1273.2.bts:system/etc/firmware/fmc_init_1273.2.bts \
     vendor/se/arc/proprietary/etc/firmware/TIInit_7.5.20.bts:system/etc/firmware/TIInit_7.5.20.bts \
     vendor/se/arc/proprietary/etc/firmware/TIInit_7.6.15.bts:system/etc/firmware/TIInit_7.6.15.bts \
-    vendor/se/arc/proprietary/etc/firmware/touch_anzu_sharp_type1.hex:system/etc/firmware/touch_anzu_sharp_type1.hex \
-    vendor/se/arc/proprietary/etc/firmware/touch_anzu_sharp_type2.hex:system/etc/firmware/touch_anzu_sharp_type2.hex \
-    vendor/se/arc/proprietary/etc/firmware/touch_anzu_sony_type1.hex:system/etc/firmware/touch_anzu_sony_type1.hex \
-    vendor/se/arc/proprietary/etc/firmware/touch_anzu_sony_type2.hex:system/etc/firmware/touch_anzu_sony_type2.hex \
     vendor/se/arc/proprietary/etc/firmware/vidc_720p_command_control.fw:system/etc/firmware/vidc_720p_command_control.fw \
     vendor/se/arc/proprietary/etc/firmware/vidc_720p_h263_dec_mc.fw:system/etc/firmware/vidc_720p_h263_dec_mc.fw \
     vendor/se/arc/proprietary/etc/firmware/vidc_720p_h264_dec_mc.fw:system/etc/firmware/vidc_720p_h264_dec_mc.fw \
@@ -137,6 +131,12 @@ PRODUCT_COPY_FILES += \
     vendor/se/arc/proprietary/etc/firmware/vidc_720p_vc1_dec_mc.fw:system/etc/firmware/vidc_720p_vc1_dec_mc.fw \
     vendor/se/arc/proprietary/etc/firmware/yamato_pfp.fw:system/etc/firmware/yamato_pfp.fw \
     vendor/se/arc/proprietary/etc/firmware/yamato_pm4.fw:system/etc/firmware/yamato_pm4.fw 
+
+#we wont update ts firmware every boot
+#    vendor/se/arc/proprietary/etc/firmware/touch_anzu_sharp_type1.hex:system/etc/firmware/touch_anzu_sharp_type1.hex \
+#    vendor/se/arc/proprietary/etc/firmware/touch_anzu_sharp_type2.hex:system/etc/firmware/touch_anzu_sharp_type2.hex \
+#    vendor/se/arc/proprietary/etc/firmware/touch_anzu_sony_type1.hex:system/etc/firmware/touch_anzu_sony_type1.hex \
+#    vendor/se/arc/proprietary/etc/firmware/touch_anzu_sony_type2.hex:system/etc/firmware/touch_anzu_sony_type2.hex \
 
 ## WIFI & BT TI1271
 PRODUCT_COPY_FILES += \
@@ -179,15 +179,16 @@ PRODUCT_COPY_FILES += \
     vendor/se/arc/proprietary/etc/sensors.conf:system/etc/sensors.conf \
     vendor/se/arc/proprietary/lib/hw/sensors.default.so:system/lib/hw/sensors.semc.so \
     vendor/se/arc/proprietary/bin/bq275xx_fwloader:system/bin/bq275xx_fwloader \
-    vendor/se/arc/proprietary/bin/cy8ctma300_fwloader:system/bin/cy8ctma300_fwloader \
     vendor/se/arc/proprietary/bin/hdmid:system/bin/hdmid \
-    vendor/se/arc/proprietary/bin/akmd8975:system/bin/akmd8975
+    vendor/se/arc/proprietary/bin/akmd8975:system/bin/akmd8975 \
+    vendor/se/arc/proprietary/bin/touchd:system/bin/touchd
 
+#    vendor/se/arc/proprietary/bin/cy8ctma300_fwloader:system/bin/cy8ctma300_fwloader \
 
 
 #Recovery TEST Files
 PRODUCT_COPY_FILES += \
-    device/se/arc/recovery.fstab:system/etc/recovery.fstab \
+    device/se/arc/recovery.fstab:root/etcrec/recovery.fstab \
     device/se/arc/prebuilt/recovery:root/sbin/recovery \
     device/se/arc/prebuilt/bootrec:root/sbin/bootrec \
     device/se/arc/prebuilt/init.rc:root/init.rc
@@ -196,22 +197,21 @@ PRODUCT_COPY_FILES += \
 
 #offline charging animation
 PRODUCT_COPY_FILES += \
-    vendor/se/arc/proprietary/bin/chargemon:system/bin/chargemon \
-    vendor/se/arc/proprietary/bin/updatemiscta:system/bin/updatemiscta \
+    device/se/arc/prebuilt/chargemon:system/bin/chargemon \
     vendor/se/arc/proprietary/lib/libmiscta.so:system/lib/libmiscta.so \
-    device/se/arc/prebuilt/animations/charging_animation_01.png:system/semc/chargemon/data/charging_animation_01.png \
-    device/se/arc/prebuilt/animations/charging_animation_02.png:system/semc/chargemon/data/charging_animation_02.png \
-    device/se/arc/prebuilt/animations/charging_animation_03.png:system/semc/chargemon/data/charging_animation_03.png \
-    device/se/arc/prebuilt/animations/charging_animation_04.png:system/semc/chargemon/data/charging_animation_04.png \
-    device/se/arc/prebuilt/animations/charging_animation_05.png:system/semc/chargemon/data/charging_animation_05.png \
-    device/se/arc/prebuilt/animations/charging_animation_06.png:system/semc/chargemon/data/charging_animation_06.png \
-    device/se/arc/prebuilt/animations/charging_animation_07.png:system/semc/chargemon/data/charging_animation_07.png \
-    device/se/arc/prebuilt/animations/charging_animation_blank.png:system/semc/chargemon/data/charging_animation_blank.png
+    device/se/arc/prebuilt/animations/charging_animation_01.png:system/etc/chargemon/animation_01.png \
+    device/se/arc/prebuilt/animations/charging_animation_02.png:system/etc/chargemon/animation_02.png \
+    device/se/arc/prebuilt/animations/charging_animation_03.png:system/etc/chargemon/animation_03.png \
+    device/se/arc/prebuilt/animations/charging_animation_04.png:system/etc/chargemon/animation_04.png \
+    device/se/arc/prebuilt/animations/charging_animation_05.png:system/etc/chargemon/animation_05.png \
+    device/se/arc/prebuilt/animations/charging_animation_06.png:system/etc/chargemon/animation_06.png \
+    device/se/arc/prebuilt/animations/charging_animation_07.png:system/etc/chargemon/animation_07.png \
+    device/se/arc/prebuilt/animations/charging_animation_blank.png:system/etc/chargemon/animation_blank.png
 
+#    vendor/se/arc/proprietary/bin/updatemiscta:system/bin/updatemiscta \
 
-#Temporary GPS Fix
+#Temporary GPS Fix untill we have 50001 gps
 PRODUCT_COPY_FILES += \
-    device/se/arc/prebuilt/gps.conf:system/etc/gps.conf \
     vendor/se/arc/proprietary/lib/hw/gps.msm7x30.so:system/lib/hw/gps.semc.so
 
 #FreeXperia BootLogo
