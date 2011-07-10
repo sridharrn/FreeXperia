@@ -32,5 +32,6 @@ add_lunch_combo cyanogen_arc-eng
 add_lunch_combo cyanogen_play-eng
 add_lunch_combo cyanogen_x10-userdebug
 add_lunch_combo cyanogen_x8-eng
+add_lunch_combo cyanogen_x10mini-eng
 
 PATH=$PATH:$PWD/vendor/cyanogen/tools ; export PATH
